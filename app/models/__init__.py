@@ -2,3 +2,4 @@ from app.models.user import User
 from app.models.security_log import SecurityLog
 from app.models.alert import Alert
 from app.models.incident import Incident
+from app.models.ioc import IOC
