@@ -1,5 +1,5 @@
 from app import create_app, db
-from app.models import User, SecurityLog
+from app.models import User, SecurityLog, Alert
 
 
 app = create_app()
