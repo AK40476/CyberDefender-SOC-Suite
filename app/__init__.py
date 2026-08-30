@@ -1,17 +1,17 @@
 from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
+
+
+db = SQLAlchemy()
 
 
 def create_app():
     app = Flask(__name__)
 
     app.config["SECRET_KEY"] = "dev-secret-key-change-later"
+    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///cyberdefender.db"
+    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-    @app.route("/")
-    def home():
-        return """
-        <h1>🛡️ CyberDefender SOC Suite</h1>
-        <p>Security Operations Center Platform</p>
-        <p>Status: System Online</p>
-        """
+    db.init_app(app)
 
     return app
