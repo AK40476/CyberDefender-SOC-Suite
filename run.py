@@ -7,6 +7,7 @@ from app.models import (
     IOC,
     InvestigationTimeline,
     Evidence,
+    AuditLog,
 )
 
 
