@@ -1,5 +1,12 @@
 from app import create_app, db
-from app.models import User, SecurityLog, Alert, Incident, IOC
+from app.models import (
+    User,
+    SecurityLog,
+    Alert,
+    Incident,
+    IOC,
+    InvestigationTimeline,
+)
 
 
 app = create_app()
