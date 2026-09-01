@@ -6,6 +6,7 @@ from app.models import (
     Incident,
     IOC,
     InvestigationTimeline,
+    Evidence,
 )
 
 
