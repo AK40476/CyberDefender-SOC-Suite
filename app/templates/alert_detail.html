@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Alert #{{ alert.id }} | CyberDefender</title>
+</head>
+
+<body>
+
+    <h1>CyberDefender SOC Suite</h1>
+
+    <h2>Alert #{{ alert.id }}</h2>
+
+    <hr>
+
+    <h3>Alert Information</h3>
+
+    <p>
+        <strong>Alert Type:</strong>
+        {{ alert.alert_type }}
+    </p>
+
+    <p>
+        <strong>Severity:</strong>
+        {{ alert.severity }}
+    </p>
+
+    <p>
+        <strong>Status:</strong>
+        {{ alert.status }}
+    </p>
+
+    <p>
+        <strong>Source IP:</strong>
+        {{ alert.source_ip or "N/A" }}
+    </p>
+
+    <p>
+        <strong>Detection Rule:</strong>
+        {{ alert.detection_rule }}
+    </p>
+
+    <p>
+        <strong>Description:</strong>
+        {{ alert.description }}
+    </p>
+
+    <p>
+        <strong>Created:</strong>
+        {{ alert.created_at }}
+    </p>
+
+    <p>
+        <strong>Last Updated:</strong>
+        {{ alert.updated_at }}
+    </p>
+
+    <hr>
+
+    <h3>Update Status</h3>
+
+    <form method="POST"
+          action="{{ url_for('alerts.update_status', alert_id=alert.id) }}">
+
+        <select name="status">
+
+            <option value="new"
+                {% if alert.status == "new" %}selected{% endif %}>
+                New
+            </option>
+
+            <option value="investigating"
+                {% if alert.status == "investigating" %}selected{% endif %}>
+                Investigating
+            </option>
+
+            <option value="resolved"
+                {% if alert.status == "resolved" %}selected{% endif %}>
+                Resolved
+            </option>
+
+            <option value="false_positive"
+                {% if alert.status == "false_positive" %}selected{% endif %}>
+                False Positive
+            </option>
+
+        </select>
+
+        <button type="submit">
+            Update Status
+        </button>
+
+    </form>
+
+    <hr>
+
+    <h3>Assignment</h3>
+
+    {% if assigned_user %}
+
+    <p>
+        Currently assigned to:
+        <strong>{{ assigned_user.username }}</strong>
+    </p>
+
+    {% else %}
+
+    <p>
+        Currently unassigned.
+    </p>
+
+    {% endif %}
+
+    <form method="POST"
+          action="{{ url_for('alerts.assign_alert', alert_id=alert.id) }}">
+
+        <select name="assigned_to">
+
+            <option value="">
+                Unassigned
+            </option>
+
+            {% for user in alert_users %}
+
+            <option value="{{ user.id }}"
+                {% if alert.assigned_to == user.id %}selected{% endif %}>
+                {{ user.username }} ({{ user.role }})
+            </option>
+
+            {% endfor %}
+
+        </select>
+
+        <button type="submit">
+            Assign Alert
+        </button>
+
+    </form>
+
+    <hr>
+
+    <a href="{{ url_for('alerts.index') }}">
+        Back to Alerts
+    </a>
+
+</body>
+
+</html>
