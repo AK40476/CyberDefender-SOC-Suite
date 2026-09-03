@@ -30,7 +30,10 @@ def create_app():
     
     from app.routes.dashboard import dashboard
     app.register_blueprint(dashboard)
-    
+
+    from app.routes.logs import logs
+    app.register_blueprint(logs)
+
     @app.errorhandler(403)
     def forbidden(error):
         return render_template("403.html"), 403
