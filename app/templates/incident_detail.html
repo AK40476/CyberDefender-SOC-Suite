@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Incident #{{ incident.id }} - CyberDefender SOC Suite</title>
+</head>
+<body>
+
+<h1>CyberDefender SOC Suite</h1>
+<h2>Incident #{{ incident.id }}</h2>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+        <p><strong>{{ message }}</strong></p>
+    {% endfor %}
+{% endwith %}
+
+<hr>
+
+<h3>Incident Information</h3>
+
+<p>
+    <strong>Title:</strong>
+    {{ incident.title }}
+</p>
+
+<p>
+    <strong>Description:</strong>
+    {{ incident.description or "No description provided." }}
+</p>
+
+<p>
+    <strong>Severity:</strong>
+    {{ incident.severity }}
+</p>
+
+<p>
+    <strong>Status:</strong>
+    {{ incident.status }}
+</p>
+
+<p>
+    <strong>Created:</strong>
+    {{ incident.created_at }}
+</p>
+
+<p>
+    <strong>Last Updated:</strong>
+    {{ incident.updated_at }}
+</p>
+
+<p>
+    <strong>Resolved At:</strong>
+    {{ incident.resolved_at or "Not resolved" }}
+</p>
+
+<p>
+    <strong>Assigned To:</strong>
+
+    {% if assigned_user %}
+        {{ assigned_user.username }}
+    {% else %}
+        Unassigned
+    {% endif %}
+</p>
+
+{% if incident.resolution %}
+<p>
+    <strong>Resolution:</strong>
+    {{ incident.resolution }}
+</p>
+{% endif %}
+
+<hr>
+
+<h3>Update Status</h3>
+
+<form method="POST"
+      action="{{ url_for('incidents.update_status', incident_id=incident.id) }}">
+
+    <select name="status">
+
+        <option value="open"
+            {% if incident.status == "open" %}selected{% endif %}>
+            Open
+        </option>
+
+        <option value="investigating"
+            {% if incident.status == "investigating" %}selected{% endif %}>
+            Investigating
+        </option>
+
+        <option value="contained"
+            {% if incident.status == "contained" %}selected{% endif %}>
+            Contained
+        </option>
+
+        <option value="resolved"
+            {% if incident.status == "resolved" %}selected{% endif %}>
+            Resolved
+        </option>
+
+        <option value="false_positive"
+            {% if incident.status == "false_positive" %}selected{% endif %}>
+            False Positive
+        </option>
+
+    </select>
+
+    <button type="submit">
+        Update Status
+    </button>
+
+</form>
+
+<hr>
+
+<h3>Assign Incident</h3>
+
+<form method="POST"
+      action="{{ url_for('incidents.assign_incident', incident_id=incident.id) }}">
+
+    <select name="assigned_to">
+
+        <option value="">Unassigned</option>
+
+        {% for user in incident_users %}
+            <option
+                value="{{ user.id }}"
+                {% if incident.assigned_to == user.id %}selected{% endif %}
+            >
+                {{ user.username }} ({{ user.role }})
+            </option>
+        {% endfor %}
+
+    </select>
+
+    <button type="submit">
+        Update Assignment
+    </button>
+
+</form>
+
+<hr>
+
+<h3>Resolve Incident</h3>
+
+<form method="POST"
+      action="{{ url_for('incidents.resolve', incident_id=incident.id) }}">
+
+    <textarea
+        name="resolution"
+        rows="5"
+        cols="60"
+        placeholder="Enter resolution details..."
+        required
+    ></textarea>
+
+    <br><br>
+
+    <button type="submit">
+        Resolve Incident
+    </button>
+
+</form>
+
+<hr>
+
+<a href="{{ url_for('incidents.index') }}">
+    Back to Incidents
+</a>
+
+<br><br>
+
+<a href="{{ url_for('dashboard.index') }}">
+    Back to Dashboard
+</a>
+
+</body>
+</html>

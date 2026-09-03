@@ -48,12 +48,8 @@ def create_log():
 
     alert = None
 
-    if (
-        event_type == "failed_login"
-        and source_ip
-        and data.get("status") == "failed"
-    ):
-        alert = detect_brute_force(source_ip)
+    if event_type == "failed_login" and data.get("source_ip"):
+        alert = detect_brute_force(data.get("source_ip"))
 
     response = {
         "message": "Security log created successfully",

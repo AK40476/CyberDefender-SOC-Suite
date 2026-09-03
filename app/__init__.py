@@ -37,6 +37,9 @@ def create_app():
     from app.routes.alerts import alerts
     app.register_blueprint(alerts)
 
+    from app.routes.incidents import incidents
+    app.register_blueprint(incidents)
+
     @app.errorhandler(403)
     def forbidden(error):
         return render_template("403.html"), 403
