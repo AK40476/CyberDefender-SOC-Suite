@@ -5,146 +5,246 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Alert #{{ alert.id }} | CyberDefender</title>
+    <title>Alert #{{ alert.id }} | CyberDefender SOC</title>
+
+    <style>
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+        }
+
+        .header {
+            background: #020617;
+            padding: 20px 30px;
+            border-bottom: 1px solid #1e293b;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+            padding: 30px;
+        }
+
+        .card {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .field {
+            background: #0f172a;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .label {
+            color: #94a3b8;
+            font-size: 13px;
+            margin-bottom: 6px;
+        }
+
+        .value {
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .high {
+            color: #f87171;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 6px 12px;
+            background: #334155;
+            border-radius: 6px;
+        }
+
+        button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        .back {
+            color: #93c5fd;
+            text-decoration: none;
+        }
+
+        .description {
+            line-height: 1.6;
+            color: #cbd5e1;
+        }
+
+    </style>
+
 </head>
 
 <body>
 
-    <h1>CyberDefender SOC Suite</h1>
+<div class="header">
 
-    <h2>Alert #{{ alert.id }}</h2>
+    <h1>🚨 CyberDefender SOC</h1>
 
-    <hr>
+    <p>Alert Investigation</p>
 
-    <h3>Alert Information</h3>
+</div>
 
-    <p>
-        <strong>Alert Type:</strong>
-        {{ alert.alert_type }}
-    </p>
+
+<div class="container">
 
     <p>
-        <strong>Severity:</strong>
-        {{ alert.severity }}
+        <a class="back" href="{{ url_for('alerts.alert_dashboard') }}">
+            ← Back to Alerts
+        </a>
     </p>
 
-    <p>
-        <strong>Status:</strong>
-        {{ alert.status }}
-    </p>
 
-    <p>
-        <strong>Source IP:</strong>
-        {{ alert.source_ip or "N/A" }}
-    </p>
+    <div class="card">
 
-    <p>
-        <strong>Detection Rule:</strong>
-        {{ alert.detection_rule }}
-    </p>
+        <h2>Alert #{{ alert.id }}</h2>
 
-    <p>
-        <strong>Description:</strong>
-        {{ alert.description }}
-    </p>
+        <div class="grid">
 
-    <p>
-        <strong>Created:</strong>
-        {{ alert.created_at }}
-    </p>
+            <div class="field">
+                <div class="label">Alert Type</div>
+                <div class="value">
+                    {{ alert.alert_type }}
+                </div>
+            </div>
 
-    <p>
-        <strong>Last Updated:</strong>
-        {{ alert.updated_at }}
-    </p>
 
-    <hr>
+            <div class="field">
 
-    <h3>Update Status</h3>
+                <div class="label">Severity</div>
 
-    <form method="POST"
-          action="{{ url_for('alerts.update_status', alert_id=alert.id) }}">
+                <div class="value high">
+                    {{ alert.severity.upper() }}
+                </div>
 
-        <select name="status">
+            </div>
 
-            <option value="new"
-                {% if alert.status == "new" %}selected{% endif %}>
-                New
-            </option>
 
-            <option value="investigating"
-                {% if alert.status == "investigating" %}selected{% endif %}>
-                Investigating
-            </option>
+            <div class="field">
 
-            <option value="resolved"
-                {% if alert.status == "resolved" %}selected{% endif %}>
-                Resolved
-            </option>
+                <div class="label">Source IP</div>
 
-            <option value="false_positive"
-                {% if alert.status == "false_positive" %}selected{% endif %}>
-                False Positive
-            </option>
+                <div class="value">
+                    {{ alert.source_ip or "N/A" }}
+                </div>
 
-        </select>
+            </div>
 
-        <button type="submit">
-            Update Status
-        </button>
 
-    </form>
+            <div class="field">
 
-    <hr>
+                <div class="label">Detection Rule</div>
 
-    <h3>Assignment</h3>
+                <div class="value">
+                    {{ alert.detection_rule }}
+                </div>
 
-    {% if assigned_user %}
+            </div>
 
-    <p>
-        Currently assigned to:
-        <strong>{{ assigned_user.username }}</strong>
-    </p>
 
-    {% else %}
+            <div class="field">
 
-    <p>
-        Currently unassigned.
-    </p>
+                <div class="label">Status</div>
 
-    {% endif %}
+                <div class="value">
 
-    <form method="POST"
-          action="{{ url_for('alerts.assign_alert', alert_id=alert.id) }}">
+                    <span class="status">
+                        {{ alert.status }}
+                    </span>
 
-        <select name="assigned_to">
+                </div>
 
-            <option value="">
-                Unassigned
-            </option>
+            </div>
 
-            {% for user in alert_users %}
 
-            <option value="{{ user.id }}"
-                {% if alert.assigned_to == user.id %}selected{% endif %}>
-                {{ user.username }} ({{ user.role }})
-            </option>
+            <div class="field">
 
-            {% endfor %}
+                <div class="label">Created At</div>
 
-        </select>
+                <div class="value">
+                    {{ alert.created_at.strftime("%Y-%m-%d %H:%M:%S") }}
+                </div>
 
-        <button type="submit">
-            Assign Alert
-        </button>
+            </div>
 
-    </form>
+        </div>
 
-    <hr>
+    </div>
 
-    <a href="{{ url_for('alerts.index') }}">
-        Back to Alerts
-    </a>
+
+    <div class="card">
+
+        <h2>Description</h2>
+
+        <p class="description">
+            {{ alert.description }}
+        </p>
+
+    </div>
+
+
+    <div class="card">
+
+        <h2>Investigation</h2>
+
+        {% if alert.status == "new" %}
+
+            <p>
+                This alert has not been investigated yet.
+            </p>
+
+            <form
+                method="POST"
+                action="{{ url_for('alerts.investigate_alert', alert_id=alert.id) }}"
+            >
+
+                <button type="submit">
+                    🔍 Start Investigation
+                </button>
+
+            </form>
+
+        {% elif alert.status == "investigating" %}
+
+            <p>
+                🔎 This alert is currently being investigated.
+            </p>
+
+        {% else %}
+
+            <p>
+                Current alert status:
+                <strong>{{ alert.status }}</strong>
+            </p>
+
+        {% endif %}
+
+    </div>
+
+</div>
 
 </body>
 

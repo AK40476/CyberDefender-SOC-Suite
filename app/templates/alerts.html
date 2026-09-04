@@ -175,7 +175,14 @@
 
                 <tr>
 
-                    <td>#{{ alert.id }}</td>
+                    <td>
+                        <a
+                            href="{{ url_for('alerts.alert_detail', alert_id=alert.id) }}"
+                            style="color: #93c5fd; text-decoration: none;"
+                        >
+                            #{{ alert.id }}
+                        </a>
+                    </td>
 
                     <td>{{ alert.alert_type }}</td>
 

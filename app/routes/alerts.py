@@ -1,8 +1,8 @@
-from flask import Blueprint, render_template
-from flask_login import login_required
+from flask import Blueprint, render_template, redirect, url_for, flash
+from flask_login import login_required, current_user
 
 from app import db
-from app.models import Alert
+from app.models import Alert, AuditLog
 
 
 alerts = Blueprint("alerts", __name__, url_prefix="/alerts")
@@ -41,4 +41,57 @@ def alert_dashboard():
         high_alerts=high_alerts,
         new_alerts=new_alerts,
         investigating_alerts=investigating_alerts
+    )
+
+
+@alerts.route("/<int:alert_id>")
+@login_required
+def alert_detail(alert_id):
+
+    alert = db.get_or_404(Alert, alert_id)
+
+    return render_template(
+        "alert_detail.html",
+        alert=alert
+    )
+
+
+@alerts.route("/<int:alert_id>/investigate", methods=["POST"])
+@login_required
+def investigate_alert(alert_id):
+
+    alert = db.get_or_404(Alert, alert_id)
+
+    previous_status = alert.status
+
+    if alert.status == "new":
+        alert.status = "investigating"
+
+        audit = AuditLog(
+            user_id=current_user.id,
+            action="start_alert_investigation",
+            resource_type="alert",
+            resource_id=alert.id,
+            description=(
+                f"Alert #{alert.id} investigation started. "
+                f"Previous status: '{previous_status}'."
+            )
+        )
+
+        db.session.add(audit)
+        db.session.commit()
+
+        flash(
+            f"Alert #{alert.id} is now under investigation.",
+            "success"
+        )
+
+    else:
+        flash(
+            f"Alert #{alert.id} is already '{alert.status}'.",
+            "info"
+        )
+
+    return redirect(
+        url_for("alerts.alert_detail", alert_id=alert.id)
     )
