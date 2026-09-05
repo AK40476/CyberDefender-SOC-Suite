@@ -73,6 +73,42 @@
 
 <hr>
 
+<h3>Investigation Timeline</h3>
+
+{% if timeline_entries %}
+
+    {% for entry in timeline_entries %}
+
+        <div>
+            <p>
+                <strong>{{ entry.action }}</strong>
+            </p>
+
+            <p>
+                {{ entry.description }}
+            </p>
+
+            <p>
+                <small>
+                    {{ entry.created_at }}
+                </small>
+            </p>
+        </div>
+
+        {% if not loop.last %}
+            <hr>
+        {% endif %}
+
+    {% endfor %}
+
+{% else %}
+
+    <p>No investigation activity recorded yet.</p>
+
+{% endif %}
+
+<hr>
+
 <h3>Update Status</h3>
 
 <form method="POST"

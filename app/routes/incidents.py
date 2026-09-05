@@ -4,7 +4,13 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
 
 from app import db
-from app.models import Incident, User, AuditLog
+from app.models import (
+    Incident,
+    User,
+    Alert,
+    AuditLog,
+    InvestigationTimeline
+)
 
 
 incidents = Blueprint(
@@ -111,11 +117,22 @@ def detail(incident_id):
         db.select(User).order_by(User.username)
     ).all()
 
+    timeline_entries = db.session.scalars(
+        db.select(InvestigationTimeline)
+        .where(
+            InvestigationTimeline.incident_id == incident.id
+        )
+        .order_by(
+            InvestigationTimeline.created_at.desc()
+        )
+    ).all()
+
     return render_template(
         "incident_detail.html",
         incident=incident,
         assigned_user=assigned_user,
-        incident_users=users
+        incident_users=users,
+        timeline_entries=timeline_entries
     )
 
 
@@ -167,7 +184,18 @@ def update_status(incident_id):
         source_ip=request.remote_addr
     )
 
+    timeline_entry = InvestigationTimeline(
+        incident_id=incident.id,
+        analyst_id=current_user.id,
+        action="status_changed",
+        description=(
+            f"Incident #{incident.id} status changed "
+            f"from '{old_status}' to '{new_status}'."
+        )
+    )
+
     db.session.add(audit_log)
+    db.session.add(timeline_entry)
     db.session.commit()
 
     flash(
@@ -238,7 +266,15 @@ def assign_incident(incident_id):
         source_ip=request.remote_addr
     )
 
+    timeline_entry = InvestigationTimeline(
+        incident_id=incident.id,
+        analyst_id=current_user.id,
+        action="assignment_changed",
+        description=assignment_description
+    )
+
     db.session.add(audit_log)
+    db.session.add(timeline_entry)
     db.session.commit()
 
     flash(
@@ -300,6 +336,90 @@ def resolve(incident_id):
 
     flash(
         "Incident resolved successfully.",
+        "success"
+    )
+
+    return redirect(
+        url_for(
+            "incidents.detail",
+            incident_id=incident.id
+        )
+    )
+
+
+@incidents.route(
+    "/from-alert/<int:alert_id>",
+    methods=["POST"]
+)
+@login_required
+def create_from_alert(alert_id):
+
+    alert = db.get_or_404(Alert, alert_id)
+
+    existing_incident = db.session.scalar(
+        db.select(Incident).where(
+            Incident.alert_id == alert.id
+        )
+    )
+
+    if existing_incident:
+        flash(
+            f"An incident already exists for Alert #{alert.id}.",
+            "info"
+        )
+
+        return redirect(
+            url_for(
+                "incidents.detail",
+                incident_id=existing_incident.id
+            )
+        )
+
+    incident = Incident(
+        alert_id=alert.id,
+        title=(
+            f"{alert.alert_type.replace('_', ' ').title()} Incident"
+        ),
+        description=(
+            f"Incident created from Alert #{alert.id}. "
+            f"{alert.description}"
+        ),
+        severity=alert.severity,
+        status="open"
+    )
+
+    db.session.add(incident)
+    db.session.flush()
+
+    timeline = InvestigationTimeline(
+        incident_id=incident.id,
+        analyst_id=current_user.id,
+        action="incident_created",
+        description=(
+            f"Incident #{incident.id} was created from "
+            f"Alert #{alert.id}."
+        )
+    )
+
+    audit_log = AuditLog(
+        user_id=current_user.id,
+        action="create_incident_from_alert",
+        resource_type="incident",
+        resource_id=incident.id,
+        description=(
+            f"Incident #{incident.id} was created from "
+            f"Alert #{alert.id}."
+        ),
+        source_ip=request.remote_addr
+    )
+
+    db.session.add(timeline)
+    db.session.add(audit_log)
+
+    db.session.commit()
+
+    flash(
+        f"Incident #{incident.id} created from Alert #{alert.id}.",
         "success"
     )
 
