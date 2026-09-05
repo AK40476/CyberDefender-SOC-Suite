@@ -233,6 +233,33 @@
                 🔎 This alert is currently being investigated.
             </p>
 
+            {% if not alert.incident %}
+
+                <form
+                    method="POST"
+                    action="{{ url_for('incidents.create_from_alert', alert_id=alert.id) }}"
+                >
+
+                    <button type="submit">
+                        🚨 Create Incident
+                    </button>
+
+                </form>
+
+        {% else %}
+
+            <p>
+                🚨 Incident already created:
+                <a
+                    href="{{ url_for('incidents.detail', incident_id=alert.incident.id) }}"
+                    style="color: #93c5fd;"
+                >
+                    Incident #{{ alert.incident.id }}
+                </a>
+            </p>
+
+        {% endif %}
+
         {% else %}
 
             <p>

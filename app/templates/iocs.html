@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>IOC Management - CyberDefender SOC Suite</title>
+</head>
+
+<body>
+
+<h1>CyberDefender SOC Suite</h1>
+<h2>IOC Management</h2>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+        <p><strong>{{ message }}</strong></p>
+    {% endfor %}
+{% endwith %}
+
+<hr>
+
+<p>
+    <a href="{{ url_for('iocs.create') }}">
+        ➕ Add IOC
+    </a>
+</p>
+
+<table border="1" cellpadding="8" cellspacing="0">
+
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Type</th>
+            <th>Value</th>
+            <th>Threat Level</th>
+            <th>Confidence</th>
+            <th>Source</th>
+            <th>Incident</th>
+            <th>Created</th>
+        </tr>
+    </thead>
+
+    <tbody>
+
+        {% for ioc in iocs %}
+
+        <tr>
+
+            <td>
+                <a href="{{ url_for('iocs.detail', ioc_id=ioc.id) }}">
+                    #{{ ioc.id }}
+                </a>
+            </td>
+
+            <td>
+                {{ ioc.type }}
+            </td>
+
+            <td>
+                {{ ioc.value }}
+            </td>
+
+            <td>
+                {{ ioc.threat_level }}
+            </td>
+
+            <td>
+                {{ ioc.confidence }}%
+            </td>
+
+            <td>
+                {{ ioc.source or "Unknown" }}
+            </td>
+
+            <td>
+
+                {% if ioc.incident %}
+                    <a href="{{ url_for('incidents.detail', incident_id=ioc.incident.id) }}">
+                        Incident #{{ ioc.incident.id }}
+                    </a>
+                {% else %}
+                    Unlinked
+                {% endif %}
+
+            </td>
+
+            <td>
+                {{ ioc.created_at }}
+            </td>
+
+        </tr>
+
+        {% else %}
+
+        <tr>
+            <td colspan="8">
+                No IOCs found.
+            </td>
+        </tr>
+
+        {% endfor %}
+
+    </tbody>
+
+</table>
+
+<hr>
+
+<p>
+    <a href="{{ url_for('dashboard.index') }}">
+        ← Back to Dashboard
+    </a>
+</p>
+
+</body>
+</html>

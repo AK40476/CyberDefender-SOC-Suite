@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add IOC - CyberDefender SOC Suite</title>
+</head>
+
+<body>
+
+<h1>CyberDefender SOC Suite</h1>
+<h2>Add Indicator of Compromise</h2>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+        <p><strong>{{ message }}</strong></p>
+    {% endfor %}
+{% endwith %}
+
+<hr>
+
+<form method="POST">
+
+    <p>
+        <label>IOC Type:</label><br>
+
+        <select name="type" required>
+
+            <option value="">Select Type</option>
+            <option value="ip">IP Address</option>
+            <option value="domain">Domain</option>
+            <option value="url">URL</option>
+            <option value="hash">File Hash</option>
+            <option value="email">Email</option>
+
+        </select>
+    </p>
+
+    <p>
+        <label>IOC Value:</label><br>
+
+        <input
+            type="text"
+            name="value"
+            maxlength="500"
+            required
+        >
+    </p>
+
+    <p>
+        <label>Threat Level:</label><br>
+
+        <select name="threat_level">
+
+            <option value="unknown">Unknown</option>
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+            <option value="critical">Critical</option>
+
+        </select>
+    </p>
+
+    <p>
+        <label>Confidence:</label><br>
+
+        <input
+            type="number"
+            name="confidence"
+            min="0"
+            max="100"
+            value="0"
+            required
+        >
+
+        %
+    </p>
+
+    <p>
+        <label>Source:</label><br>
+
+        <input
+            type="text"
+            name="source"
+            maxlength="100"
+            placeholder="e.g. VirusTotal, SOC Analyst, SIEM"
+        >
+    </p>
+
+    <p>
+        <label>Link to Incident:</label><br>
+
+        <select name="incident_id">
+
+            <option value="">
+                No Incident
+            </option>
+
+            {% for incident in incidents %}
+
+                <option value="{{ incident.id }}">
+                    Incident #{{ incident.id }} -
+                    {{ incident.title }}
+                </option>
+
+            {% endfor %}
+
+        </select>
+
+    </p>
+
+    <button type="submit">
+        Add IOC
+    </button>
+
+</form>
+
+<hr>
+
+<a href="{{ url_for('iocs.index') }}">
+    ← Back to IOC Management
+</a>
+
+</body>
+</html>

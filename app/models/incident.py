@@ -8,9 +8,30 @@ class Incident(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
 
-    title = db.Column(db.String(150), nullable=False)
+    alert_id = db.Column(
+        db.Integer,
+        db.ForeignKey("alerts.id"),
+        nullable=True,
+        unique=True
+    )
 
-    description = db.Column(db.Text, nullable=True)
+    alert = db.relationship(
+        "Alert",
+        backref=db.backref(
+            "incident",
+            uselist=False
+        )
+    )
+
+    title = db.Column(
+        db.String(150),
+        nullable=False
+    )
+
+    description = db.Column(
+        db.Text,
+        nullable=True
+    )
 
     severity = db.Column(
         db.String(20),

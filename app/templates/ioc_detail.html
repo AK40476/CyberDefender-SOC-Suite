@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>IOC #{{ ioc.id }} - CyberDefender SOC Suite</title>
+</head>
+
+<body>
+
+<h1>CyberDefender SOC Suite</h1>
+<h2>IOC #{{ ioc.id }}</h2>
+
+<hr>
+
+<h3>IOC Information</h3>
+
+<p>
+    <strong>Type:</strong>
+    {{ ioc.type }}
+</p>
+
+<p>
+    <strong>Value:</strong>
+    {{ ioc.value }}
+</p>
+
+<p>
+    <strong>Threat Level:</strong>
+    {{ ioc.threat_level }}
+</p>
+
+<p>
+    <strong>Confidence:</strong>
+    {{ ioc.confidence }}%
+</p>
+
+<p>
+    <strong>Source:</strong>
+    {{ ioc.source or "Unknown" }}
+</p>
+
+<p>
+    <strong>First Seen:</strong>
+    {{ ioc.first_seen or "Unknown" }}
+</p>
+
+<p>
+    <strong>Last Seen:</strong>
+    {{ ioc.last_seen or "Unknown" }}
+</p>
+
+<p>
+    <strong>Created:</strong>
+    {{ ioc.created_at }}
+</p>
+
+<hr>
+
+<h3>Related Incident</h3>
+
+{% if ioc.incident %}
+
+    <p>
+        <a href="{{ url_for('incidents.detail', incident_id=ioc.incident.id) }}">
+            🚨 Incident #{{ ioc.incident.id }}
+        </a>
+    </p>
+
+    <p>
+        <strong>Title:</strong>
+        {{ ioc.incident.title }}
+    </p>
+
+    <p>
+        <strong>Status:</strong>
+        {{ ioc.incident.status }}
+    </p>
+
+{% else %}
+
+    <p>
+        This IOC is not linked to an incident.
+    </p>
+
+{% endif %}
+
+<hr>
+
+<a href="{{ url_for('iocs.index') }}">
+    ← Back to IOC Management
+</a>
+
+<br><br>
+
+<a href="{{ url_for('dashboard.index') }}">
+    ← Back to Dashboard
+</a>
+
+</body>
+</html>

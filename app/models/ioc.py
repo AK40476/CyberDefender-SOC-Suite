@@ -6,11 +6,20 @@ from app import db
 class IOC(db.Model):
     __tablename__ = "iocs"
 
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
 
-    type = db.Column(db.String(20), nullable=False)
+    type = db.Column(
+        db.String(20),
+        nullable=False
+    )
 
-    value = db.Column(db.String(500), nullable=False)
+    value = db.Column(
+        db.String(500),
+        nullable=False
+    )
 
     threat_level = db.Column(
         db.String(20),
@@ -36,6 +45,26 @@ class IOC(db.Model):
 
     last_seen = db.Column(
         db.DateTime,
+        nullable=True
+    )
+
+    incident_id = db.Column(
+        db.Integer,
+        db.ForeignKey("incidents.id"),
+        nullable=True
+    )
+
+    incident = db.relationship(
+        "Incident",
+        backref=db.backref(
+            "iocs",
+            lazy=True
+        )
+    )
+
+    created_by = db.Column(
+        db.Integer,
+        db.ForeignKey("users.id"),
         nullable=True
     )
 
