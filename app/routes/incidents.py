@@ -9,7 +9,8 @@ from app.models import (
     User,
     Alert,
     AuditLog,
-    InvestigationTimeline
+    InvestigationTimeline,
+    IOC
 )
 
 
@@ -103,7 +104,11 @@ def create():
 @incidents.route("/<int:incident_id>")
 @login_required
 def detail(incident_id):
-    incident = db.get_or_404(Incident, incident_id)
+
+    incident = db.get_or_404(
+        Incident,
+        incident_id
+    )
 
     assigned_user = None
 
@@ -127,12 +132,23 @@ def detail(incident_id):
         )
     ).all()
 
+    incident_iocs = db.session.scalars(
+        db.select(IOC)
+        .where(
+            IOC.incident_id == incident.id
+        )
+        .order_by(
+            IOC.created_at.desc()
+        )
+    ).all()
+
     return render_template(
         "incident_detail.html",
         incident=incident,
         assigned_user=assigned_user,
         incident_users=users,
-        timeline_entries=timeline_entries
+        timeline_entries=timeline_entries,
+        incident_iocs=incident_iocs
     )
 
 

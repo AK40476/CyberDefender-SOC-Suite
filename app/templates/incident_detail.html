@@ -71,6 +71,47 @@
 </p>
 {% endif %}
 
+<h3>Indicators of Compromise</h3>
+
+{% if incident_iocs %}
+<table border="1" cellpadding="8" cellspacing="0">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Type</th>
+            <th>Value</th>
+            <th>Threat Level</th>
+            <th>Confidence</th>
+            <th>Source</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for ioc in incident_iocs %}
+        <tr>
+            <td>
+                <a href="{{ url_for('iocs.detail', ioc_id=ioc.id) }}">
+                    #{{ ioc.id }}
+                </a>
+            </td>
+
+            <td>{{ ioc.type }}</td>
+
+            <td>{{ ioc.value }}</td>
+
+            <td>{{ ioc.threat_level }}</td>
+
+            <td>{{ ioc.confidence }}%</td>
+
+            <td>{{ ioc.source or "Unknown" }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No Indicators of Compromise are linked to this incident.</p>
+{% endif %}
+
 <hr>
 
 <h3>Investigation Timeline</h3>
