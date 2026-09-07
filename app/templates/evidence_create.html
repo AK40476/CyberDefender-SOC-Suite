@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add Evidence - CyberDefender SOC Suite</title>
+</head>
+<body>
+
+<h1>CyberDefender SOC Suite</h1>
+<h2>Add Investigation Evidence</h2>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+        <p><strong>{{ message }}</strong></p>
+    {% endfor %}
+{% endwith %}
+
+<hr>
+
+<form method="POST">
+
+    <p>
+        <label>Incident:</label><br>
+
+        <select name="incident_id" required>
+            <option value="">Select Incident</option>
+
+            {% for incident in incidents %}
+                <option value="{{ incident.id }}">
+                    Incident #{{ incident.id }} - {{ incident.title }}
+                </option>
+            {% endfor %}
+
+        </select>
+    </p>
+
+    <p>
+        <label>Evidence Type:</label><br>
+
+        <select name="evidence_type" required>
+            <option value="">Select Evidence Type</option>
+            <option value="log">Log File</option>
+            <option value="screenshot">Screenshot</option>
+            <option value="network_capture">Network Capture</option>
+            <option value="malware_sample">Malware Sample</option>
+            <option value="document">Document</option>
+            <option value="other">Other</option>
+        </select>
+    </p>
+
+    <p>
+        <label>Evidence Title:</label><br>
+
+        <input
+            type="text"
+            name="title"
+            maxlength="150"
+            placeholder="e.g. Brute Force Authentication Logs"
+            required
+        >
+    </p>
+
+    <p>
+        <label>Description:</label><br>
+
+        <textarea
+            name="description"
+            rows="5"
+            cols="60"
+            placeholder="Describe what this evidence contains and why it is relevant..."
+        ></textarea>
+    </p>
+
+    <p>
+        <label>File Path / Reference:</label><br>
+
+        <input
+            type="text"
+            name="file_path"
+            maxlength="500"
+            placeholder="e.g. evidence/incident-2/auth.log"
+        >
+    </p>
+
+    <p>
+        <label>Evidence Hash:</label><br>
+
+        <input
+            type="text"
+            name="hash_value"
+            maxlength="128"
+            placeholder="SHA-256 / SHA-1 / MD5"
+        >
+    </p>
+
+    <button type="submit">
+        Add Evidence
+    </button>
+
+</form>
+
+<hr>
+
+<p>
+    <a href="{{ url_for('evidence.index') }}">
+        ← Back to Evidence Management
+    </a>
+</p>
+
+<p>
+    <a href="{{ url_for('dashboard.index') }}">
+        ← Back to Dashboard
+    </a>
+</p>
+
+</body>
+</html>

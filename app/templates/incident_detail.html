@@ -114,6 +114,46 @@
 
 <hr>
 
+<h3>Evidence</h3>
+
+{% if incident.evidence %}
+<table border="1" cellpadding="8" cellspacing="0">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Type</th>
+            <th>Title</th>
+            <th>Hash</th>
+            <th>Collected At</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for item in incident.evidence %}
+        <tr>
+            <td>
+                <a href="{{ url_for('evidence.detail', evidence_id=item.id) }}">
+                    #{{ item.id }}
+                </a>
+            </td>
+
+            <td>{{ item.evidence_type }}</td>
+
+            <td>{{ item.title }}</td>
+
+            <td>{{ item.hash_value or "Not provided" }}</td>
+
+            <td>{{ item.collected_at }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No evidence is linked to this incident.</p>
+{% endif %}
+
+<hr>
+
 <h3>Investigation Timeline</h3>
 
 {% if timeline_entries %}

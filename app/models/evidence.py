@@ -14,6 +14,10 @@ class Evidence(db.Model):
         nullable=False
     )
 
+    incident = db.relationship(
+    "Incident",
+    backref=db.backref("evidence", lazy=True)
+    )
     evidence_type = db.Column(
         db.String(50),
         nullable=False

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Evidence Management - CyberDefender SOC Suite</title>
+</head>
+<body>
+
+<h1>CyberDefender SOC Suite</h1>
+<h2>Evidence Management</h2>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+        <p><strong>{{ message }}</strong></p>
+    {% endfor %}
+{% endwith %}
+
+<hr>
+
+<p>
+    <a href="{{ url_for('evidence.create') }}">
+        + Add Evidence
+    </a>
+</p>
+
+<hr>
+
+<h3>Evidence Records</h3>
+
+<p>
+    <strong>Results:</strong> {{ evidence_list|length }}
+</p>
+
+<table border="1" cellpadding="8" cellspacing="0">
+
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Incident</th>
+            <th>Type</th>
+            <th>Title</th>
+            <th>Hash</th>
+            <th>Collected By</th>
+            <th>Collected At</th>
+        </tr>
+    </thead>
+
+    <tbody>
+
+        {% for item in evidence_list %}
+
+        <tr>
+
+            <td>
+                <a href="{{ url_for('evidence.detail', evidence_id=item.id) }}">
+                    #{{ item.id }}
+                </a>
+            </td>
+
+            <td>
+                <a href="{{ url_for('incidents.detail', incident_id=item.incident_id) }}">
+                    Incident #{{ item.incident_id }}
+                </a>
+            </td>
+
+            <td>{{ item.evidence_type }}</td>
+
+            <td>{{ item.title }}</td>
+
+            <td>
+                {{ item.hash_value or "Not provided" }}
+            </td>
+
+            <td>{{ item.collected_by or "Unknown" }}</td>
+
+            <td>{{ item.collected_at }}</td>
+
+        </tr>
+
+        {% else %}
+
+        <tr>
+            <td colspan="7">
+                No evidence records found.
+            </td>
+        </tr>
+
+        {% endfor %}
+
+    </tbody>
+
+</table>
+
+<hr>
+
+<p>
+    <a href="{{ url_for('dashboard.index') }}">
+        ← Back to Dashboard
+    </a>
+</p>
+
+</body>
+</html>

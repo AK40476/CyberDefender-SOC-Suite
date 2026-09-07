@@ -43,6 +43,9 @@ def create_app():
     from app.routes.iocs import iocs
     app.register_blueprint(iocs)
 
+    from app.routes.evidence import evidence
+    app.register_blueprint(evidence)
+
     @app.errorhandler(403)
     def forbidden(error):
         return render_template("403.html"), 403

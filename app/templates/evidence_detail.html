@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Evidence #{{ evidence.id }} - CyberDefender SOC Suite</title>
+</head>
+
+<body>
+
+<h1>CyberDefender SOC Suite</h1>
+
+<h2>Evidence #{{ evidence.id }}</h2>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+        <p><strong>{{ message }}</strong></p>
+    {% endfor %}
+{% endwith %}
+
+<hr>
+
+<h3>Evidence Information</h3>
+
+<p>
+    <strong>Title:</strong>
+    {{ evidence.title }}
+</p>
+
+<p>
+    <strong>Evidence Type:</strong>
+    {{ evidence.evidence_type }}
+</p>
+
+<p>
+    <strong>Description:</strong>
+    {{ evidence.description or "No description provided." }}
+</p>
+
+<p>
+    <strong>File Path / Reference:</strong>
+    {{ evidence.file_path or "Not provided" }}
+</p>
+
+<p>
+    <strong>Hash:</strong>
+    {{ evidence.hash_value or "Not provided" }}
+</p>
+
+<p>
+    <strong>Collected By:</strong>
+    {% if collected_by_user %}
+        {{ collected_by_user.username }}
+    {% else %}
+        Unknown
+    {% endif %}
+</p>
+
+<p>
+    <strong>Collected At:</strong>
+    {{ evidence.collected_at }}
+</p>
+
+<hr>
+
+<h3>Related Incident</h3>
+
+<p>
+    <a href="{{ url_for('incidents.detail', incident_id=evidence.incident_id) }}">
+        Incident #{{ evidence.incident_id }}
+    </a>
+</p>
+
+<hr>
+
+<p>
+    <a href="{{ url_for('evidence.index') }}">
+        ← Back to Evidence Management
+    </a>
+</p>
+
+<p>
+    <a href="{{ url_for('dashboard.index') }}">
+        ← Back to Dashboard
+    </a>
+</p>
+
+</body>
+</html>
