@@ -154,6 +154,86 @@
 
 <hr>
 
+<h3>Analyst Investigation Notes</h3>
+
+<form method="POST"
+      action="{{ url_for('incidents.add_note', incident_id=incident.id) }}">
+
+    <label for="note">Add Investigation Note</label>
+    <br>
+
+    <textarea
+        id="note"
+        name="note"
+        rows="5"
+        cols="80"
+        placeholder="Record your investigation findings..."
+        required></textarea>
+
+    <br><br>
+
+    <button type="submit">
+        Add Note
+    </button>
+
+</form>
+
+<br>
+
+{% if incident.notes %}
+<table border="1" cellpadding="8" cellspacing="0">
+
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Analyst</th>
+            <th>Investigation Note</th>
+            <th>Created At</th>
+        </tr>
+    </thead>
+
+    <tbody>
+
+        {% for note in incident.notes|sort(attribute='created_at', reverse=true) %}
+
+        <tr>
+
+            <td>
+                #{{ note.id }}
+            </td>
+
+            <td>
+                {% if note.analyst %}
+                    {{ note.analyst.username }}
+                {% else %}
+                    Unknown
+                {% endif %}
+            </td>
+            
+            <td>
+                {{ note.note }}
+            </td>
+
+            <td>
+                {{ note.created_at }}
+            </td>
+
+        </tr>
+
+        {% endfor %}
+
+    </tbody>
+
+</table>
+
+{% else %}
+
+<p>No investigation notes have been added yet.</p>
+
+{% endif %}
+
+<hr>
+
 <h3>Investigation Timeline</h3>
 
 {% if timeline_entries %}

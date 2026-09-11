@@ -23,6 +23,13 @@ class Incident(db.Model):
         )
     )
 
+    notes = db.relationship(
+        "AnalystNote",
+        backref="incident",
+        lazy=True,
+        cascade="all, delete-orphan"
+    )
+
     title = db.Column(
         db.String(150),
         nullable=False

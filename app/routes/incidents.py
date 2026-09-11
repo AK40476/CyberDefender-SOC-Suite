@@ -6,11 +6,13 @@ from flask_login import login_required, current_user
 from app import db
 from app.models import (
     Incident,
-    User,
     Alert,
-    AuditLog,
+    User,
     InvestigationTimeline,
-    IOC
+    IOC,
+    Evidence,
+    AnalystNote,
+    AuditLog
 )
 
 
@@ -151,6 +153,68 @@ def detail(incident_id):
         incident_iocs=incident_iocs
     )
 
+@incidents.route("/<int:incident_id>/notes", methods=["POST"])
+@login_required
+def add_note(incident_id):
+
+    incident = db.get_or_404(
+        Incident,
+        incident_id
+    )
+
+    note_text = request.form.get("note", "").strip()
+
+    if not note_text:
+        flash("Investigation note cannot be empty.", "error")
+        return redirect(
+            url_for("incidents.detail", incident_id=incident.id)
+        )
+
+    note = AnalystNote(
+        incident_id=incident.id,
+        analyst_id=current_user.id,
+        note=note_text
+    )
+
+    db.session.add(note)
+    db.session.flush()
+
+    audit = AuditLog(
+        user_id=current_user.id,
+        action="add_investigation_note",
+        resource_type="incident",
+        resource_id=incident.id,
+        description=(
+            f"Analyst note #{note.id} was added to "
+            f"Incident #{incident.id}."
+        ),
+        source_ip=request.remote_addr
+    )
+
+    db.session.add(audit)
+
+    timeline = InvestigationTimeline(
+        incident_id=incident.id,
+        analyst_id=current_user.id,
+        action="add_note",
+        description=(
+            f"Investigation note #{note.id} added by "
+            f"{current_user.username}."
+        )
+    )
+
+    db.session.add(timeline)
+
+    db.session.commit()
+
+    flash(
+        f"Investigation note #{note.id} added successfully.",
+        "success"
+    )
+
+    return redirect(
+        url_for("incidents.detail", incident_id=incident.id)
+    )
 
 @incidents.route(
     "/<int:incident_id>/status",

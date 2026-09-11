@@ -6,3 +6,4 @@ from app.models.ioc import IOC
 from app.models.timeline import InvestigationTimeline
 from app.models.evidence import Evidence
 from app.models.audit_log import AuditLog
+from app.models.analyst_note import AnalystNote
