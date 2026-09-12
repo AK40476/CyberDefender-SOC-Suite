@@ -1,33 +1,460 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>CyberDefender SOC Dashboard</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            color: #1f2937;
+        }
+
+        .header {
+            background: #111827;
+            color: white;
+            padding: 20px 30px;
+        }
+
+        .header h1 {
+            margin: 0 0 8px 0;
+        }
+
+        .header p {
+            margin: 0;
+        }
+
+        .container {
+            padding: 25px;
+            max-width: 1400px;
+            margin: auto;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 18px;
+            margin-bottom: 25px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .card h3 {
+            margin-top: 0;
+            font-size: 15px;
+        }
+
+        .number {
+            font-size: 32px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .section {
+            background: white;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .section h2 {
+            margin-top: 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 11px;
+            border-bottom: 1px solid #e5e7eb;
+            text-align: left;
+        }
+
+        th {
+            background: #f3f4f6;
+        }
+
+        .high {
+            font-weight: bold;
+        }
+
+        .navigation {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .navigation a {
+            text-decoration: none;
+            background: #111827;
+            color: white;
+            padding: 10px 16px;
+            border-radius: 5px;
+        }
+
+        .logout {
+            color: white;
+            text-decoration: none;
+            float: right;
+        }
+
+        @media (max-width: 900px) {
+            .cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .cards {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 
 <body>
 
-    <h1>CyberDefender SOC Suite</h1>
+    <div class="header">
 
-    <h2>SOC Dashboard</h2>
+        <a class="logout" href="{{ url_for('auth.logout') }}">
+            Logout
+        </a>
 
-    <p>
-        Welcome, {{ user.username }}
-    </p>
+        <h1>CyberDefender SOC Suite</h1>
 
-    <p>
-        Role: {{ user.role }}
-    </p>
+        <p>
+            Security Operations Center Dashboard
+        </p>
 
-    <p>
-        Authentication successful.
-    </p>
+        <p>
+            Analyst: {{ user.username }} |
+            Role: {{ user.role }}
+        </p>
 
-    <a href="{{ url_for('auth.logout') }}">
-        Logout
-    </a>
+    </div>
+
+
+    <div class="container">
+
+        <!-- SOC METRICS -->
+
+        <div class="cards">
+
+            <div class="card">
+                <h3>Total Alerts</h3>
+                <div class="number">
+                    {{ total_alerts }}
+                </div>
+                <p>All security alerts</p>
+            </div>
+
+
+            <div class="card">
+                <h3>High Severity Alerts</h3>
+                <div class="number">
+                    {{ high_alerts }}
+                </div>
+                <p>Requires attention</p>
+            </div>
+
+
+            <div class="card">
+                <h3>Active Incidents</h3>
+                <div class="number">
+                    {{ active_incidents }}
+                </div>
+                <p>Unresolved incidents</p>
+            </div>
+
+
+            <div class="card">
+                <h3>Total IOCs</h3>
+                <div class="number">
+                    {{ total_iocs }}
+                </div>
+                <p>Indicators tracked</p>
+            </div>
+
+        </div>
+
+
+        <!-- SECONDARY METRICS -->
+
+        <div class="cards">
+
+            <div class="card">
+                <h3>New Alerts</h3>
+                <div class="number">
+                    {{ new_alerts }}
+                </div>
+            </div>
+
+
+            <div class="card">
+                <h3>Investigating Alerts</h3>
+                <div class="number">
+                    {{ investigating_alerts }}
+                </div>
+            </div>
+
+
+            <div class="card">
+                <h3>High Severity Incidents</h3>
+                <div class="number">
+                    {{ high_incidents }}
+                </div>
+            </div>
+
+
+            <div class="card">
+                <h3>Total Evidence</h3>
+                <div class="number">
+                    {{ total_evidence }}
+                </div>
+            </div>
+
+        </div>
+
+
+        <!-- RECENT ALERTS -->
+
+        <div class="section">
+
+            <h2>Recent Security Alerts</h2>
+
+            {% if recent_alerts %}
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Type</th>
+                        <th>Severity</th>
+                        <th>Status</th>
+                        <th>Source IP</th>
+                        <th>Created</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for alert in recent_alerts %}
+
+                    <tr>
+
+                        <td>
+                            <a href="{{ url_for('alerts.alert_detail', alert_id=alert.id) }}">
+                                #{{ alert.id }}
+                            </a>
+                        </td>
+
+                        <td>
+                            {{ alert.alert_type }}
+                        </td>
+
+                        <td class="high">
+                            {{ alert.severity }}
+                        </td>
+
+                        <td>
+                            {{ alert.status }}
+                        </td>
+
+                        <td>
+                            {{ alert.source_ip or "N/A" }}
+                        </td>
+
+                        <td>
+                            {{ alert.created_at }}
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+            {% else %}
+
+            <p>No alerts available.</p>
+
+            {% endif %}
+
+        </div>
+
+
+        <!-- RECENT INCIDENTS -->
+
+        <div class="section">
+
+            <h2>Recent Incidents</h2>
+
+            {% if recent_incidents %}
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Title</th>
+                        <th>Severity</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for incident in recent_incidents %}
+
+                    <tr>
+
+                        <td>
+                            <a href="{{ url_for('incidents.detail', incident_id=incident.id) }}">
+                                #{{ incident.id }}
+                            </a>
+                        </td>
+
+                        <td>
+                            {{ incident.title }}
+                        </td>
+
+                        <td class="high">
+                            {{ incident.severity }}
+                        </td>
+
+                        <td>
+                            {{ incident.status }}
+                        </td>
+
+                        <td>
+                            {{ incident.created_at }}
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+            {% else %}
+
+            <p>No incidents available.</p>
+
+            {% endif %}
+
+        </div>
+
+
+        <!-- INVESTIGATION ACTIVITY -->
+
+        <div class="section">
+
+            <h2>Recent Investigation Activity</h2>
+
+            {% if recent_timeline %}
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>Incident</th>
+                        <th>Action</th>
+                        <th>Description</th>
+                        <th>Time</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for entry in recent_timeline %}
+
+                    <tr>
+
+                        <td>
+                            <a href="{{ url_for('incidents.detail', incident_id=entry.incident_id) }}">
+                                Incident #{{ entry.incident_id }}
+                            </a>
+                        </td>
+
+                        <td>
+                            {{ entry.action }}
+                        </td>
+
+                        <td>
+                            {{ entry.description }}
+                        </td>
+
+                        <td>
+                            {{ entry.created_at }}
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+            {% else %}
+
+            <p>No investigation activity available.</p>
+
+            {% endif %}
+
+        </div>
+
+
+        <!-- QUICK NAVIGATION -->
+
+        <div class="section">
+
+            <h2>SOC Modules</h2>
+
+            <div class="navigation">
+
+                <a href="{{ url_for('alerts.alert_dashboard') }}">
+                    Alerts
+                </a>
+
+                <a href="{{ url_for('incidents.index') }}">
+                    Incidents
+                </a>
+
+                <a href="{{ url_for('iocs.index') }}">
+                    IOCs
+                </a>
+
+                <a href="{{ url_for('evidence.index') }}">
+                    Evidence
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
 
 </body>
+
 </html>
