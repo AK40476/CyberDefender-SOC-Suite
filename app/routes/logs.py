@@ -5,7 +5,10 @@ from flask_login import login_required
 
 from app import db
 from app.models import SecurityLog
-from app.services.detection_engine import detect_brute_force
+from app.services.detection_engine import (
+    detect_brute_force,
+    detect_credential_stuffing
+)
 
 
 logs = Blueprint("logs", __name__, url_prefix="/api/logs")
@@ -49,7 +52,13 @@ def create_log():
     alert = None
 
     if event_type == "failed_login" and data.get("source_ip"):
-        alert = detect_brute_force(data.get("source_ip"))
+
+        source_ip = data.get("source_ip")
+
+        alert = detect_brute_force(source_ip)
+
+        if not alert:
+            alert = detect_credential_stuffing(source_ip)
 
     response = {
         "message": "Security log created successfully",
