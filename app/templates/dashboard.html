@@ -111,6 +111,31 @@
             text-decoration: none;
             float: right;
         }
+        
+        .risk-score {
+            font-weight: bold;
+        }
+
+        .priority {
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .priority-critical {
+            color: #991b1b;
+        }
+
+        .priority-high {
+            color: #b45309;
+        }
+
+        .priority-medium {
+            color: #1d4ed8;
+        }
+
+        .priority-low {
+            color: #047857;
+        }
 
         @media (max-width: 900px) {
             .cards {
@@ -245,6 +270,8 @@
                         <th>ID</th>
                         <th>Type</th>
                         <th>Severity</th>
+                        <th>Risk Score</th>
+                        <th>Priority</th>
                         <th>Status</th>
                         <th>Source IP</th>
                         <th>Created</th>
@@ -271,6 +298,30 @@
                             {{ alert.severity }}
                         </td>
 
+                        <td class="risk-score">
+                            {{ alert.risk_score }}/100
+                        </td>
+
+                        <td>
+                            {% if alert.risk_score >= 80 %}
+                                <span class="priority priority-critical">
+                                    Critical
+                                </span>
+                            {% elif alert.risk_score >= 60 %}
+                                <span class="priority priority-high">
+                                    High
+                                </span>
+                            {% elif alert.risk_score >= 30 %}
+                                <span class="priority priority-medium">
+                                    Medium
+                                </span>
+                            {% else %}
+                                <span class="priority priority-low">
+                                    Low
+                                </span>
+                            {% endif %}
+                        </td>
+
                         <td>
                             {{ alert.status }}
                         </td>
@@ -291,7 +342,7 @@
 
             </table>
 
-            {% else %}
+             {% else %}
 
             <p>No alerts available.</p>
 
