@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
 from app import db
-from app.models import SecurityLog, Alert
+from app.models import SecurityLog, Alert, IOC
 
 
 FAILED_LOGIN_THRESHOLD = 5
@@ -112,6 +112,59 @@ def detect_credential_stuffing(source_ip):
         ),
         source_ip=source_ip,
         detection_rule="CREDENTIAL_STUFFING",
+        status="new"
+    )
+
+    db.session.add(alert)
+    db.session.commit()
+
+    return alert
+
+def detect_suspicious_ip(source_ip):
+    """
+    Detect security activity originating from an IP
+    that exists as a high or critical threat IOC.
+    """
+
+    ioc = db.session.scalar(
+        db.select(IOC).where(
+            IOC.type == "ip",
+            IOC.value == source_ip,
+            IOC.threat_level.in_(["high", "critical"])
+        )
+    )
+
+    if not ioc:
+        return None
+
+    existing_alert = db.session.scalar(
+        db.select(Alert).where(
+            Alert.alert_type == "suspicious_ip_activity",
+            Alert.source_ip == source_ip,
+            Alert.status == "new"
+        )
+    )
+
+    if existing_alert:
+        return existing_alert
+
+    severity = (
+        "critical"
+        if ioc.threat_level == "critical"
+        else "high"
+    )
+
+    alert = Alert(
+        alert_type="suspicious_ip_activity",
+        severity=severity,
+        description=(
+            f"Security activity detected from IOC "
+            f"{source_ip}. IOC threat level: "
+            f"{ioc.threat_level}, confidence: "
+            f"{ioc.confidence}%."
+        ),
+        source_ip=source_ip,
+        detection_rule="IOC_MATCH",
         status="new"
     )
 

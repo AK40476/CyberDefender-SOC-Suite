@@ -12,7 +12,7 @@ auth = Blueprint("auth", __name__)
 def login():
 
     if current_user.is_authenticated:
-        return redirect(url_for("dashboard"))
+        return redirect(url_for("dashboard.index"))
 
     if request.method == "POST":
 
