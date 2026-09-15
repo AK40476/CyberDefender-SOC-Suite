@@ -16,6 +16,12 @@ class Alert(db.Model):
         default="medium"
     )
 
+    risk_score = db.Column(
+        db.Integer,
+        nullable=False,
+        default=0
+    )
+
     description = db.Column(db.Text, nullable=False)
 
     source_ip = db.Column(db.String(45), nullable=True)

@@ -1,3 +1,4 @@
+from app.services.risk_scoring import calculate_risk_score
 from datetime import datetime, timedelta
 
 from app import db
@@ -56,6 +57,9 @@ def detect_brute_force(source_ip):
     )
 
     db.session.add(alert)
+
+    alert.risk_score = calculate_risk_score(alert)
+
     db.session.commit()
 
     return alert
@@ -116,6 +120,9 @@ def detect_credential_stuffing(source_ip):
     )
 
     db.session.add(alert)
+
+    alert.risk_score = calculate_risk_score(alert)
+
     db.session.commit()
 
     return alert
@@ -169,6 +176,9 @@ def detect_suspicious_ip(source_ip):
     )
 
     db.session.add(alert)
+
+    alert.risk_score = calculate_risk_score(alert)
+
     db.session.commit()
 
     return alert
