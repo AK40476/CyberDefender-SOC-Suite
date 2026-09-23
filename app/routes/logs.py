@@ -10,6 +10,7 @@ from app.services.detection_engine import (
     detect_credential_stuffing,
     detect_suspicious_ip
 )
+from app.services.correlation_engine import correlate_alert
 
 
 logs = Blueprint("logs", __name__, url_prefix="/api/logs")
@@ -71,5 +72,12 @@ def create_log():
         response["alert_id"] = alert.id
         response["alert_type"] = alert.alert_type
         response["severity"] = alert.severity
+        response["risk_score"] = alert.risk_score
+
+        correlation = correlate_alert(alert)
+
+        response["correlated"] = correlation["correlated"]
+        response["related_alert_count"] = correlation["alert_count"]
+        response["attack_chain"] = correlation["attack_chain"]
 
     return jsonify(response), 201
