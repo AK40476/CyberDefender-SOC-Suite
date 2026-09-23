@@ -94,6 +94,56 @@
             color: #cbd5e1;
         }
 
+        .correlation {
+            border: 1px solid #475569;
+        }
+
+        .correlation-success {
+            border-left: 5px solid #22c55e;
+        }
+
+        .correlation-none {
+            border-left: 5px solid #64748b;
+        }
+
+        .chain {
+            font-size: 20px;
+            font-weight: bold;
+            color: #fbbf24;
+            margin-bottom: 15px;
+        }
+
+        .related-alert {
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 12px;
+        }
+
+        .related-alert a {
+            color: #93c5fd;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .related-alert-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .mini-label {
+            color: #94a3b8;
+            font-size: 12px;
+        }
+
+        .mini-value {
+            font-weight: bold;
+            margin-top: 4px;
+        }
+
     </style>
 
 </head>
@@ -205,6 +255,95 @@
 
     </div>
 
+        <div class="card correlation
+        {% if correlation.correlated %}
+            correlation-success
+        {% else %}
+            correlation-none
+        {% endif %}
+    ">
+
+        <h2>🔗 Attack Correlation</h2>
+
+        {% if correlation.correlated %}
+
+            <p>
+                This alert is part of a correlated attack activity.
+            </p>
+
+            <div class="chain">
+                {{ correlation.attack_chain }}
+            </div>
+
+            <p>
+                <strong>Related Alerts:</strong>
+                {{ correlation.alert_count }}
+            </p>
+
+            {% for related_alert in correlation.alerts %}
+
+                <div class="related-alert">
+
+                    <a href="{{ url_for(
+                        'alerts.alert_detail',
+                        alert_id=related_alert.id
+                    ) }}">
+                        Alert #{{ related_alert.id }}
+                    </a>
+
+                    <div class="related-alert-grid">
+
+                        <div>
+                            <div class="mini-label">
+                                Detection Rule
+                            </div>
+
+                            <div class="mini-value">
+                                {{ related_alert.detection_rule }}
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="mini-label">
+                                Severity
+                            </div>
+
+                            <div class="mini-value">
+                                {{ related_alert.severity.upper() }}
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="mini-label">
+                                Risk Score
+                            </div>
+
+                            <div class="mini-value">
+                                {{ related_alert.risk_score }}/100
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            {% endfor %}
+
+        {% else %}
+
+            <p>
+                No correlated attack activity detected
+                for this alert.
+            </p>
+
+            <p>
+                Related alerts:
+                {{ correlation.alert_count }}
+            </p>
+
+        {% endif %}
+
+    </div>
 
     <div class="card">
 

@@ -50,9 +50,14 @@ def alert_detail(alert_id):
 
     alert = db.get_or_404(Alert, alert_id)
 
+    from app.services.correlation_engine import correlate_alert
+
+    correlation = correlate_alert(alert)
+
     return render_template(
         "alert_detail.html",
-        alert=alert
+        alert=alert,
+        correlation=correlation
     )
 
 
