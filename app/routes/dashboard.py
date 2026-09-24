@@ -3,6 +3,7 @@ from flask_login import login_required, current_user
 
 from app import db
 from app.models import Alert, Incident, IOC, Evidence, InvestigationTimeline
+from app.services.attack_chain_service import get_correlated_attack_chains
 from app.utils.decorators import role_required
 
 
@@ -66,6 +67,8 @@ def index():
         db.select(db.func.count(Evidence.id))
     ) or 0
 
+    correlated_attack_chains = get_correlated_attack_chains()
+
     return render_template(
         "dashboard.html",
         user=current_user,
@@ -84,7 +87,9 @@ def index():
 
         recent_alerts=alerts[:5],
         recent_incidents=incidents[:5],
-        recent_timeline=recent_timeline
+        recent_timeline=recent_timeline,
+
+        correlated_attack_chains=correlated_attack_chains
     )
 
 
