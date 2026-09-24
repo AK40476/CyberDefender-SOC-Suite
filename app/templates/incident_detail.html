@@ -277,30 +277,18 @@
 
     <select name="status">
 
-        <option value="open"
-            {% if incident.status == "open" %}selected{% endif %}>
-            Open
+        <option value="{{ incident.status }}" selected>
+            {{ incident.status.replace("_", " ").title() }}
+            (Current)
         </option>
 
-        <option value="investigating"
-            {% if incident.status == "investigating" %}selected{% endif %}>
-            Investigating
-        </option>
+        {% for status in allowed_next_statuses %}
 
-        <option value="contained"
-            {% if incident.status == "contained" %}selected{% endif %}>
-            Contained
-        </option>
+            <option value="{{ status }}">
+                {{ status.replace("_", " ").title() }}
+            </option>
 
-        <option value="resolved"
-            {% if incident.status == "resolved" %}selected{% endif %}>
-            Resolved
-        </option>
-
-        <option value="false_positive"
-            {% if incident.status == "false_positive" %}selected{% endif %}>
-            False Positive
-        </option>
+        {% endfor %}
 
     </select>
 

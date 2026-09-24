@@ -1,3 +1,5 @@
+from app.services.incident_workflow import is_valid_transition
+from app.services.incident_workflow import get_allowed_next_statuses
 from datetime import datetime
 
 from flask import Blueprint, render_template, request, redirect, url_for, flash
@@ -112,6 +114,10 @@ def detail(incident_id):
         incident_id
     )
 
+    allowed_next_statuses = get_allowed_next_statuses(
+            incident.status
+    )
+
     assigned_user = None
 
     if incident.assigned_to:
@@ -150,7 +156,8 @@ def detail(incident_id):
         assigned_user=assigned_user,
         incident_users=users,
         timeline_entries=timeline_entries,
-        incident_iocs=incident_iocs
+        incident_iocs=incident_iocs,
+        allowed_next_statuses=allowed_next_statuses
     )
 
 @incidents.route("/<int:incident_id>/notes", methods=["POST"])
@@ -222,7 +229,11 @@ def add_note(incident_id):
 )
 @login_required
 def update_status(incident_id):
-    incident = db.get_or_404(Incident, incident_id)
+
+    incident = db.get_or_404(
+        Incident,
+        incident_id
+    )
 
     new_status = request.form.get("status")
 
@@ -235,7 +246,11 @@ def update_status(incident_id):
     ]
 
     if new_status not in allowed_statuses:
-        flash("Invalid incident status.", "error")
+        flash(
+            "Invalid incident status.",
+            "error"
+        )
+
         return redirect(
             url_for(
                 "incidents.detail",
@@ -245,22 +260,68 @@ def update_status(incident_id):
 
     old_status = incident.status
 
-    incident.status = new_status
+    if old_status == new_status:
+        flash(
+            "Incident is already in that status.",
+            "info"
+        )
+
+        return redirect(
+            url_for(
+                "incidents.detail",
+                incident_id=incident.id
+            )
+        )
+
+    if not is_valid_transition(
+        old_status,
+        new_status
+    ):
+        flash(
+            f"Invalid status transition: "
+            f"{old_status} → {new_status}.",
+            "error"
+        )
+
+        return redirect(
+            url_for(
+                "incidents.detail",
+                incident_id=incident.id
+            )
+        )
 
     if new_status == "resolved":
+        flash(
+            "Use the Resolve Incident form to provide "
+            "resolution details.",
+            "error"
+        )
+
+        return redirect(
+            url_for(
+                "incidents.detail",
+                incident_id=incident.id
+            )
+        )
+
+    incident.status = new_status
+
+    if new_status == "false_positive":
         incident.resolved_at = datetime.utcnow()
     else:
         incident.resolved_at = None
+
+    description = (
+        f"Incident #{incident.id} status changed "
+        f"from '{old_status}' to '{new_status}'."
+    )
 
     audit_log = AuditLog(
         user_id=current_user.id,
         action="update_incident_status",
         resource_type="incident",
         resource_id=incident.id,
-        description=(
-            f"Incident #{incident.id} status changed "
-            f"from '{old_status}' to '{new_status}'."
-        ),
+        description=description,
         source_ip=request.remote_addr
     )
 
@@ -268,14 +329,12 @@ def update_status(incident_id):
         incident_id=incident.id,
         analyst_id=current_user.id,
         action="status_changed",
-        description=(
-            f"Incident #{incident.id} status changed "
-            f"from '{old_status}' to '{new_status}'."
-        )
+        description=description
     )
 
     db.session.add(audit_log)
     db.session.add(timeline_entry)
+
     db.session.commit()
 
     flash(
@@ -376,13 +435,50 @@ def assign_incident(incident_id):
 )
 @login_required
 def resolve(incident_id):
-    incident = db.get_or_404(Incident, incident_id)
 
-    resolution = request.form.get("resolution")
+    incident = db.get_or_404(
+        Incident,
+        incident_id
+    )
+
+    resolution = request.form.get(
+        "resolution",
+        ""
+    ).strip()
 
     if not resolution:
         flash(
             "Resolution details are required.",
+            "error"
+        )
+
+        return redirect(
+            url_for(
+                "incidents.detail",
+                incident_id=incident.id
+            )
+        )
+
+    if incident.status == "resolved":
+        flash(
+            "Incident is already resolved.",
+            "info"
+        )
+
+        return redirect(
+            url_for(
+                "incidents.detail",
+                incident_id=incident.id
+            )
+        )
+
+    if not is_valid_transition(
+        incident.status,
+        "resolved"
+    ):
+        flash(
+            f"Incident cannot be resolved directly "
+            f"from '{incident.status}'.",
             "error"
         )
 
@@ -399,19 +495,32 @@ def resolve(incident_id):
     incident.resolution = resolution
     incident.resolved_at = datetime.utcnow()
 
+    description = (
+        f"Incident #{incident.id} was resolved. "
+        f"Previous status: '{old_status}'. "
+        f"Resolution recorded by "
+        f"{current_user.username}."
+    )
+
     audit_log = AuditLog(
         user_id=current_user.id,
         action="resolve_incident",
         resource_type="incident",
         resource_id=incident.id,
-        description=(
-            f"Incident #{incident.id} was resolved. "
-            f"Previous status: '{old_status}'."
-        ),
+        description=description,
         source_ip=request.remote_addr
     )
 
+    timeline_entry = InvestigationTimeline(
+        incident_id=incident.id,
+        analyst_id=current_user.id,
+        action="incident_resolved",
+        description=description
+    )
+
     db.session.add(audit_log)
+    db.session.add(timeline_entry)
+
     db.session.commit()
 
     flash(
