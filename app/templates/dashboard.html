@@ -347,7 +347,7 @@
             </div>
 
         </div>
-        
+
         <section class="analytics-section">
 
             <h2>📊 SOC Analytics</h2>
@@ -565,6 +565,97 @@
                 <p>
                     No correlated attack chains detected.
                 </p>
+
+            {% endif %}
+
+        </div>
+
+        <!-- PRIORITY ALERT QUEUE -->
+
+        <div class="section">
+
+            <h2>Analyst Priority Queue</h2>
+
+            {% if prioritized_alerts %}
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>Priority</th>
+                        <th>Alert</th>
+                        <th>Type</th>
+                        <th>Risk Score</th>
+                        <th>Severity</th>
+                        <th>Detection Rule</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for item in prioritized_alerts %}
+
+                    {% set alert = item.alert %}
+
+                    <tr>
+
+                        <td>
+                            <span class="priority priority-{{ item.priority }}">
+                                {{ item.priority }}
+                            </span>
+                        </td>
+
+                        <td>
+                            <a href="{{ url_for(
+                                'alerts.alert_detail',
+                                alert_id=alert.id
+                            ) }}">
+                                #{{ alert.id }}
+                            </a>
+                        </td>
+
+                        <td>
+                            {{ alert.alert_type }}
+                        </td>
+
+                        <td class="risk-score">
+                            {{ alert.risk_score }}/100
+                        </td>
+
+                        <td>
+                            {{ alert.severity }}
+                        </td>
+
+                        <td>
+                            {{ alert.detection_rule }}
+                        </td>
+
+                        <td>
+                            {{ alert.status }}
+                        </td>
+
+                        <td>
+                            <a href="{{ url_for(
+                                'alerts.alert_detail',
+                                alert_id=alert.id
+                            ) }}">
+                                Investigate
+                            </a>
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+            {% else %}
+
+            <p>No alerts available for prioritization.</p>
 
             {% endif %}
 

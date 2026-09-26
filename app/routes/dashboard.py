@@ -5,6 +5,7 @@ from app import db
 from app.models import Alert, Incident, IOC, Evidence, InvestigationTimeline
 from app.services.attack_chain_service import get_correlated_attack_chains
 from app.services.soc_analytics import get_soc_analytics
+from app.services.alert_prioritization import get_prioritized_alerts
 from app.utils.decorators import role_required
 
 
@@ -72,6 +73,8 @@ def index():
 
     correlated_attack_chains = get_correlated_attack_chains()
     
+    prioritized_alerts = get_prioritized_alerts(alerts)
+
     return render_template(
         "dashboard.html",
         user=current_user,
@@ -94,7 +97,9 @@ def index():
         recent_incidents=incidents[:5],
         recent_timeline=recent_timeline,
 
-        correlated_attack_chains=correlated_attack_chains
+        correlated_attack_chains=correlated_attack_chains,
+
+        prioritized_alerts=prioritized_alerts
     )
 
 
