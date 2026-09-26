@@ -6,6 +6,10 @@ from app.models import Alert, Incident, IOC, Evidence, InvestigationTimeline
 from app.services.attack_chain_service import get_correlated_attack_chains
 from app.services.soc_analytics import get_soc_analytics
 from app.services.alert_prioritization import get_prioritized_alerts
+from app.services.triage_service import (
+    get_triage_queue,
+    get_triage_summary
+)
 from app.utils.decorators import role_required
 
 
@@ -72,8 +76,11 @@ def index():
     analytics = get_soc_analytics()
 
     correlated_attack_chains = get_correlated_attack_chains()
-    
+
     prioritized_alerts = get_prioritized_alerts(alerts)
+
+    triage_queue = get_triage_queue(alerts)
+    triage_summary = get_triage_summary(alerts)
 
     return render_template(
         "dashboard.html",
@@ -99,7 +106,10 @@ def index():
 
         correlated_attack_chains=correlated_attack_chains,
 
-        prioritized_alerts=prioritized_alerts
+        prioritized_alerts=prioritized_alerts,
+
+        triage_queue=triage_queue,
+        triage_summary=triage_summary
     )
 
 

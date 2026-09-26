@@ -570,6 +570,109 @@
 
         </div>
 
+        <section class="dashboard-section">
+            <div class="section-header">
+                <div>
+                    <h2>Active Investigation Queue</h2>
+                    <p>Alerts currently requiring analyst attention.</p>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-label">Active</span>
+                    <span class="stat-value">
+                        {{ triage_summary.total_active }}
+                    </span>
+                </div>
+
+                <div class="stat-card">
+                    <span class="stat-label">New</span>
+                    <span class="stat-value">
+                        {{ triage_summary.new }}
+                    </span>
+                </div>
+
+                <div class="stat-card">
+                    <span class="stat-label">Investigating</span>
+                    <span class="stat-value">
+                        {{ triage_summary.investigating }}
+                    </span>
+                </div>
+
+                <div class="stat-card">
+                    <span class="stat-label">Critical</span>
+                    <span class="stat-value">
+                        {{ triage_summary.critical }}
+                    </span>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Priority</th>
+                            <th>Alert</th>
+                            <th>Status</th>
+                            <th>Risk</th>
+                            <th>Severity</th>
+                            <th>Detection Rule</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for item in triage_queue %}
+                        <tr>
+                            <td>
+                                <strong>
+                                    {{ item.priority|upper }}
+                                </strong>
+                            </td>
+
+                            <td>
+                                Alert #{{ item.alert.id }}
+                            </td>
+
+                            <td>
+                                {{ item.alert.status|upper }}
+                            </td>
+
+                            <td>
+                                {{ item.alert.risk_score }}
+                            </td>
+
+                            <td>
+                                {{ item.alert.severity|upper }}
+                            </td>
+
+                            <td>
+                                {{ item.alert.detection_rule }}
+                            </td>
+
+                            <td>
+                                <a href="{{ url_for(
+                                    'alerts.alert_detail',
+                                    alert_id=item.alert.id
+                                ) }}">
+                                    Investigate
+                                </a>
+                            </td>
+                        </tr>
+
+                        {% else %}
+                        <tr>
+                            <td colspan="7">
+                                No active alerts require investigation.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
         <!-- PRIORITY ALERT QUEUE -->
 
         <div class="section">
