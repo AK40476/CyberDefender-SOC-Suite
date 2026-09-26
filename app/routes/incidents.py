@@ -114,6 +114,8 @@ def detail(incident_id):
         incident_id
     )
 
+    originating_alert = incident.alert
+
     allowed_next_statuses = get_allowed_next_statuses(
             incident.status
     )
@@ -153,6 +155,7 @@ def detail(incident_id):
     return render_template(
         "incident_detail.html",
         incident=incident,
+        originating_alert=originating_alert,
         assigned_user=assigned_user,
         incident_users=users,
         timeline_entries=timeline_entries,

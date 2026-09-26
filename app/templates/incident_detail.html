@@ -71,6 +71,58 @@
 </p>
 {% endif %}
 
+{% if originating_alert %}
+<hr>
+
+<h3>Originating Alert</h3>
+
+<table border="1" cellpadding="8" cellspacing="0">
+    <tr>
+        <th>Alert ID</th>
+        <td>#{{ originating_alert.id }}</td>
+    </tr>
+
+    <tr>
+        <th>Alert Type</th>
+        <td>{{ originating_alert.alert_type }}</td>
+    </tr>
+
+    <tr>
+        <th>Detection Rule</th>
+        <td>{{ originating_alert.detection_rule }}</td>
+    </tr>
+
+    <tr>
+        <th>Severity</th>
+        <td>{{ originating_alert.severity }}</td>
+    </tr>
+
+    <tr>
+        <th>Risk Score</th>
+        <td>{{ originating_alert.risk_score }}/100</td>
+    </tr>
+
+    <tr>
+        <th>Source IP</th>
+        <td>{{ originating_alert.source_ip or "N/A" }}</td>
+    </tr>
+
+    <tr>
+        <th>Alert Status</th>
+        <td>{{ originating_alert.status }}</td>
+    </tr>
+</table>
+
+<br>
+
+<a href="{{ url_for(
+    'alerts.alert_detail',
+    alert_id=originating_alert.id
+) }}">
+    View Originating Alert
+</a>
+{% endif %}
+
 <h3>Indicators of Compromise</h3>
 
 {% if incident_iocs %}
