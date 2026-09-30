@@ -548,6 +548,22 @@ def create_from_alert(alert_id):
 
     alert = db.get_or_404(Alert, alert_id)
 
+    # Only active alerts can be converted into incidents.
+    if alert.status not in {"new", "investigating"}:
+        flash(
+            f"Alert #{alert.id} cannot create an incident "
+            f"while its status is '{alert.status}'.",
+            "error"
+        )
+
+        return redirect(
+            url_for(
+                "alerts.alert_detail",
+                alert_id=alert.id
+            )
+        )
+
+    # Prevent duplicate incidents for the same alert.
     existing_incident = db.session.scalar(
         db.select(Incident).where(
             Incident.alert_id == alert.id
@@ -567,6 +583,7 @@ def create_from_alert(alert_id):
             )
         )
 
+    # Create incident and assign it to the current analyst.
     incident = Incident(
         alert_id=alert.id,
         title=(
@@ -577,41 +594,69 @@ def create_from_alert(alert_id):
             f"{alert.description}"
         ),
         severity=alert.severity,
-        status="open"
+        status="open",
+        assigned_to=current_user.id
     )
 
     db.session.add(incident)
     db.session.flush()
 
+    # Incident creation timeline entry.
+    creation_description = (
+        f"Incident #{incident.id} was created from "
+        f"Alert #{alert.id}."
+    )
+
     timeline = InvestigationTimeline(
         incident_id=incident.id,
         analyst_id=current_user.id,
         action="incident_created",
-        description=(
-            f"Incident #{incident.id} was created from "
-            f"Alert #{alert.id}."
-        )
+        description=creation_description
     )
 
+    # Automatic assignment timeline entry.
+    assignment_description = (
+        f"Incident #{incident.id} was automatically assigned "
+        f"to user '{current_user.username}' after creation."
+    )
+
+    assignment_timeline = InvestigationTimeline(
+        incident_id=incident.id,
+        analyst_id=current_user.id,
+        action="assignment_changed",
+        description=assignment_description
+    )
+
+    # Incident creation audit entry.
     audit_log = AuditLog(
         user_id=current_user.id,
         action="create_incident_from_alert",
         resource_type="incident",
         resource_id=incident.id,
-        description=(
-            f"Incident #{incident.id} was created from "
-            f"Alert #{alert.id}."
-        ),
+        description=creation_description,
+        source_ip=request.remote_addr
+    )
+
+    # Automatic assignment audit entry.
+    assignment_audit = AuditLog(
+        user_id=current_user.id,
+        action="assign_incident",
+        resource_type="incident",
+        resource_id=incident.id,
+        description=assignment_description,
         source_ip=request.remote_addr
     )
 
     db.session.add(timeline)
+    db.session.add(assignment_timeline)
     db.session.add(audit_log)
+    db.session.add(assignment_audit)
 
     db.session.commit()
 
     flash(
-        f"Incident #{incident.id} created from Alert #{alert.id}.",
+        f"Incident #{incident.id} created and assigned to "
+        f"{current_user.username}.",
         "success"
     )
 
