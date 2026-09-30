@@ -1,127 +1,632 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
-    <title>Incidents - CyberDefender SOC Suite</title>
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Incident Management | CyberDefender SOC</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+        }
+
+        .header {
+            background: #020617;
+            padding: 22px 30px;
+            border-bottom: 1px solid #1e293b;
+        }
+
+        .header h1 {
+            margin: 0;
+        }
+
+        .header p {
+            color: #94a3b8;
+            margin-bottom: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 30px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns:
+                repeat(4, 1fr);
+
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .stat-label {
+            color: #94a3b8;
+            font-size: 13px;
+        }
+
+        .stat-value {
+            display: block;
+            margin-top: 8px;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .filters {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .filters form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: end;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .filter-group label {
+            color: #94a3b8;
+            font-size: 13px;
+        }
+
+        select,
+        button {
+            padding: 10px 12px;
+            border-radius: 6px;
+            border: 1px solid #475569;
+            background: #0f172a;
+            color: #e2e8f0;
+        }
+
+        button {
+            background: #2563eb;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        .quick-links {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .quick-links a {
+            color: #93c5fd;
+            text-decoration: none;
+            padding: 8px 12px;
+            border: 1px solid #334155;
+            border-radius: 6px;
+        }
+
+        .table-container {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 10px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 14px;
+            text-align: left;
+            border-bottom: 1px solid #334155;
+        }
+
+        th {
+            color: #94a3b8;
+            font-size: 13px;
+        }
+
+        td {
+            font-size: 14px;
+        }
+
+        .critical {
+            color: #f87171;
+            font-weight: bold;
+        }
+
+        .high {
+            color: #fb923c;
+            font-weight: bold;
+        }
+
+        .active {
+            color: #fbbf24;
+            font-weight: bold;
+        }
+
+        .resolved {
+            color: #4ade80;
+            font-weight: bold;
+        }
+
+        .view {
+            color: #93c5fd;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .footer-links {
+            margin-top: 25px;
+        }
+
+        .footer-links a {
+            color: #93c5fd;
+            text-decoration: none;
+            margin-right: 20px;
+        }
+
+        @media (max-width: 800px) {
+
+            .stats {
+                grid-template-columns:
+                    repeat(2, 1fr);
+            }
+
+        }
+
+    </style>
+
 </head>
+
 <body>
 
-<h1>CyberDefender SOC Suite</h1>
-<h2>Incident Management</h2>
+<div class="header">
 
-<p>
-    Logged in as:
-    <strong>{{ current_user.username }}</strong>
-</p>
+    <h1>CyberDefender SOC Suite</h1>
 
-<hr>
+    <p>Incident Response & Investigation Workspace</p>
 
-<form method="GET" action="{{ url_for('incidents.index') }}">
+</div>
 
-    <label>Severity:</label>
-    <select name="severity">
-        <option value="">All</option>
-        <option value="critical"
-            {% if selected_severity == "critical" %}selected{% endif %}>
-            Critical
-        </option>
-        <option value="high"
-            {% if selected_severity == "high" %}selected{% endif %}>
-            High
-        </option>
-        <option value="medium"
-            {% if selected_severity == "medium" %}selected{% endif %}>
-            Medium
-        </option>
-        <option value="low"
-            {% if selected_severity == "low" %}selected{% endif %}>
-            Low
-        </option>
-    </select>
 
-    <label>Status:</label>
-    <select name="status">
-        <option value="">All</option>
-        <option value="open"
-            {% if selected_status == "open" %}selected{% endif %}>
-            Open
-        </option>
-        <option value="investigating"
-            {% if selected_status == "investigating" %}selected{% endif %}>
-            Investigating
-        </option>
-        <option value="contained"
-            {% if selected_status == "contained" %}selected{% endif %}>
-            Contained
-        </option>
-        <option value="resolved"
-            {% if selected_status == "resolved" %}selected{% endif %}>
-            Resolved
-        </option>
-        <option value="false_positive"
-            {% if selected_status == "false_positive" %}selected{% endif %}>
-            False Positive
-        </option>
-    </select>
+<div class="container">
 
-    <button type="submit">Filter</button>
-</form>
+    <p>
+        Logged in as:
+        <strong>{{ current_user.username }}</strong>
+    </p>
 
-<hr>
 
-<p>
-    <a href="{{ url_for('incidents.create') }}">
-        + Create New Incident
-    </a>
-</p>
+    <!-- Incident statistics -->
 
-<table border="1" cellpadding="8">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Title</th>
-            <th>Severity</th>
-            <th>Status</th>
-            <th>Assigned To</th>
-            <th>Created</th>
-            <th>Action</th>
-        </tr>
-    </thead>
+    <div class="stats">
 
-    <tbody>
+        <div class="stat-card">
 
-    {% for incident in incidents %}
-        <tr>
-            <td>{{ incident.id }}</td>
-            <td>{{ incident.title }}</td>
-            <td>{{ incident.severity }}</td>
-            <td>{{ incident.status }}</td>
-            <td>
-                {% if incident.assigned_to %}
-                    User #{{ incident.assigned_to }}
-                {% else %}
-                    Unassigned
-                {% endif %}
-            </td>
-            <td>{{ incident.created_at }}</td>
-            <td>
-                <a href="{{ url_for('incidents.detail', incident_id=incident.id) }}">
-                    View
-                </a>
-            </td>
-        </tr>
-    {% else %}
-        <tr>
-            <td colspan="7">No incidents found.</td>
-        </tr>
-    {% endfor %}
+            <span class="stat-label">
+                Active Incidents
+            </span>
 
-    </tbody>
-</table>
+            <span class="stat-value">
+                {{ active_incidents }}
+            </span>
 
-<hr>
+        </div>
 
-<a href="{{ url_for('dashboard.index') }}">Back to Dashboard</a>
+
+        <div class="stat-card">
+
+            <span class="stat-label">
+                My Investigations
+            </span>
+
+            <span class="stat-value">
+                {{ my_incidents }}
+            </span>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <span class="stat-label">
+                Critical
+            </span>
+
+            <span class="stat-value critical">
+                {{ critical_incidents }}
+            </span>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <span class="stat-label">
+                High
+            </span>
+
+            <span class="stat-value high">
+                {{ high_incidents }}
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <!-- Filters -->
+
+    <div class="filters">
+
+        <h3>Incident Filters</h3>
+
+        <form method="GET"
+              action="{{ url_for('incidents.index') }}">
+
+            <div class="filter-group">
+
+                <label for="severity">
+                    Severity
+                </label>
+
+                <select name="severity"
+                        id="severity">
+
+                    <option value="">
+                        All
+                    </option>
+
+                    <option value="critical"
+                        {% if selected_severity == "critical" %}
+                        selected
+                        {% endif %}>
+                        Critical
+                    </option>
+
+                    <option value="high"
+                        {% if selected_severity == "high" %}
+                        selected
+                        {% endif %}>
+                        High
+                    </option>
+
+                    <option value="medium"
+                        {% if selected_severity == "medium" %}
+                        selected
+                        {% endif %}>
+                        Medium
+                    </option>
+
+                    <option value="low"
+                        {% if selected_severity == "low" %}
+                        selected
+                        {% endif %}>
+                        Low
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="filter-group">
+
+                <label for="status">
+                    Status
+                </label>
+
+                <select name="status"
+                        id="status">
+
+                    <option value="">
+                        All
+                    </option>
+
+                    <option value="open"
+                        {% if selected_status == "open" %}
+                        selected
+                        {% endif %}>
+                        Open
+                    </option>
+
+                    <option value="investigating"
+                        {% if selected_status == "investigating" %}
+                        selected
+                        {% endif %}>
+                        Investigating
+                    </option>
+
+                    <option value="contained"
+                        {% if selected_status == "contained" %}
+                        selected
+                        {% endif %}>
+                        Contained
+                    </option>
+
+                    <option value="resolved"
+                        {% if selected_status == "resolved" %}
+                        selected
+                        {% endif %}>
+                        Resolved
+                    </option>
+
+                    <option value="false_positive"
+                        {% if selected_status == "false_positive" %}
+                        selected
+                        {% endif %}>
+                        False Positive
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="filter-group">
+
+                <label for="assigned">
+                    Assignment
+                </label>
+
+                <select name="assigned"
+                        id="assigned">
+
+                    <option value="">
+                        Everyone
+                    </option>
+
+                    <option value="me"
+                        {% if selected_assigned == "me" %}
+                        selected
+                        {% endif %}>
+                        My Investigations
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <button type="submit">
+                Apply Filters
+            </button>
+
+        </form>
+
+
+        <div class="quick-links">
+
+            <a href="{{ url_for(
+                'incidents.index',
+                assigned='me'
+            ) }}">
+                My Active Investigations
+            </a>
+
+            <a href="{{ url_for(
+                'incidents.index',
+                status='investigating'
+            ) }}">
+                Investigating
+            </a>
+
+            <a href="{{ url_for(
+                'incidents.index',
+                status='contained'
+            ) }}">
+                Contained
+            </a>
+
+            <a href="{{ url_for(
+                'incidents.index'
+            ) }}">
+                Clear Filters
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- Incident table -->
+
+    <div class="table-container">
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th>ID</th>
+                    <th>Title</th>
+                    <th>Severity</th>
+                    <th>Status</th>
+                    <th>Assigned To</th>
+                    <th>Created</th>
+                    <th>Action</th>
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+            {% for incident in incidents %}
+
+                <tr>
+
+                    <td>
+                        #{{ incident.id }}
+                    </td>
+
+
+                    <td>
+                        <strong>
+                            {{ incident.title }}
+                        </strong>
+                    </td>
+
+
+                    <td>
+
+                        {% if incident.severity == "critical" %}
+
+                            <span class="critical">
+                                CRITICAL
+                            </span>
+
+                        {% elif incident.severity == "high" %}
+
+                            <span class="high">
+                                HIGH
+                            </span>
+
+                        {% else %}
+
+                            {{ incident.severity.upper() }}
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <td>
+
+                        {% if incident.status in [
+                            "open",
+                            "investigating",
+                            "contained"
+                        ] %}
+
+                            <span class="active">
+                                {{ incident.status
+                                    .replace("_", " ")
+                                    .upper() }}
+                            </span>
+
+                        {% else %}
+
+                            <span class="resolved">
+                                {{ incident.status
+                                    .replace("_", " ")
+                                    .upper() }}
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <td>
+
+                        {% if incident.assigned_to %}
+
+                            {% set assigned_user =
+                                incident_users_map.get(
+                                    incident.assigned_to
+                                )
+                            %}
+
+                            {% if assigned_user %}
+                                {{ assigned_user.username }}
+                            {% else %}
+                                User #{{ incident.assigned_to }}
+                            {% endif %}
+
+                        {% else %}
+
+                            Unassigned
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <td>
+                        {{ incident.created_at }}
+                    </td>
+
+
+                    <td>
+
+                        <a class="view"
+                           href="{{ url_for(
+                               'incidents.detail',
+                               incident_id=incident.id
+                           ) }}">
+                            Investigate
+                        </a>
+
+                    </td>
+
+                </tr>
+
+            {% else %}
+
+                <tr>
+
+                    <td colspan="7">
+                        No incidents found.
+                    </td>
+
+                </tr>
+
+            {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+
+    <div class="footer-links">
+
+        <a href="{{ url_for('dashboard.index') }}">
+            ← Back to Dashboard
+        </a>
+
+        <a href="{{ url_for('incidents.create') }}">
+            + Create New Incident
+        </a>
+
+    </div>
+
+</div>
 
 </body>
+
 </html>

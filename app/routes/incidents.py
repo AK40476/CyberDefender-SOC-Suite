@@ -28,26 +28,94 @@ incidents = Blueprint(
 @incidents.route("/")
 @login_required
 def index():
+
     severity = request.args.get("severity")
     status = request.args.get("status")
+    assigned = request.args.get("assigned")
 
     query = db.select(Incident).order_by(
         Incident.created_at.desc()
     )
 
     if severity:
-        query = query.where(Incident.severity == severity)
+        query = query.where(
+            Incident.severity == severity
+        )
 
     if status:
-        query = query.where(Incident.status == status)
+        query = query.where(
+            Incident.status == status
+        )
+
+    if assigned == "me":
+        query = query.where(
+            Incident.assigned_to == current_user.id
+        )
 
     incident_list = db.session.scalars(query).all()
+
+    all_incidents = db.session.scalars(
+        db.select(Incident)
+    ).all()
+
+    users = db.session.scalars(
+    db.select(User)
+    ).all()
+
+    incident_users_map = {
+        user.id: user
+        for user in users
+    }
+    active_incidents = sum(
+        1
+        for incident in all_incidents
+        if incident.status not in {
+            "resolved",
+            "false_positive"
+        }
+    )
+
+    my_incidents = sum(
+        1
+        for incident in all_incidents
+        if incident.assigned_to == current_user.id
+        and incident.status not in {
+            "resolved",
+            "false_positive"
+        }
+    )
+
+    critical_incidents = sum(
+        1
+        for incident in all_incidents
+        if incident.severity == "critical"
+        and incident.status not in {
+            "resolved",
+            "false_positive"
+        }
+    )
+
+    high_incidents = sum(
+        1
+        for incident in all_incidents
+        if incident.severity == "high"
+        and incident.status not in {
+            "resolved",
+            "false_positive"
+        }
+    )
 
     return render_template(
         "incidents.html",
         incidents=incident_list,
         selected_severity=severity,
-        selected_status=status
+        selected_status=status,
+        selected_assigned=assigned,
+        active_incidents=active_incidents,
+        my_incidents=my_incidents,
+        critical_incidents=critical_incidents,
+        incident_users_map=incident_users_map,
+        high_incidents=high_incidents
     )
 
 
