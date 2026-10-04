@@ -2,416 +2,921 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Incident #{{ incident.id }} - CyberDefender SOC Suite</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #0b1120;
+            color: #e5e7eb;
+            min-height: 100vh;
+        }
+
+        .layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 240px;
+            background: #080d18;
+            border-right: 1px solid #1e293b;
+            padding: 25px 18px;
+            position: fixed;
+            height: 100vh;
+        }
+
+        .brand {
+            color: #38bdf8;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .brand-subtitle {
+            color: #64748b;
+            font-size: 11px;
+            margin-top: 5px;
+            margin-bottom: 35px;
+        }
+
+        .nav-title {
+            color: #475569;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 20px 10px 10px;
+        }
+
+        .nav a {
+            display: block;
+            color: #94a3b8;
+            text-decoration: none;
+            padding: 11px 12px;
+            border-radius: 7px;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .nav a:hover,
+        .nav a.active {
+            background: #0f2436;
+            color: #38bdf8;
+        }
+
+        .main {
+            margin-left: 240px;
+            width: calc(100% - 240px);
+            padding: 30px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 25px;
+        }
+
+        .header h1 {
+            font-size: 26px;
+        }
+
+        .header p {
+            color: #64748b;
+            font-size: 12px;
+            margin-top: 7px;
+        }
+
+        .back {
+            color: #38bdf8;
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 9px;
+            border-radius: 5px;
+            font-size: 10px;
+            text-transform: uppercase;
+            font-weight: bold;
+            margin-top: 12px;
+        }
+
+        .critical {
+            background: #3b1118;
+            color: #fb7185;
+        }
+
+        .high {
+            background: #3a2410;
+            color: #fb923c;
+        }
+
+        .medium {
+            background: #332b0a;
+            color: #facc15;
+        }
+
+        .low {
+            background: #0c2b25;
+            color: #34d399;
+        }
+
+        .status {
+            background: #172033;
+            color: #38bdf8;
+        }
+
+        .overview {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat {
+            background: #111827;
+            border: 1px solid #1e293b;
+            border-radius: 10px;
+            padding: 17px;
+        }
+
+        .stat-label {
+            color: #64748b;
+            font-size: 10px;
+            text-transform: uppercase;
+        }
+
+        .stat-value {
+            margin-top: 8px;
+            font-size: 17px;
+            font-weight: bold;
+        }
+
+        .section {
+            background: #111827;
+            border: 1px solid #1e293b;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .section-header {
+            padding: 17px 20px;
+            border-bottom: 1px solid #1e293b;
+        }
+
+        .section-header h2 {
+            font-size: 15px;
+        }
+
+        .section-body {
+            padding: 20px;
+        }
+
+        .details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 18px;
+        }
+
+        .detail label {
+            display: block;
+            color: #64748b;
+            font-size: 10px;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .detail span {
+            color: #e2e8f0;
+            font-size: 13px;
+        }
+
+        .description {
+            color: #cbd5e1;
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            color: #64748b;
+            font-size: 10px;
+            text-transform: uppercase;
+            padding: 11px;
+            border-bottom: 1px solid #334155;
+        }
+
+        td {
+            padding: 12px 11px;
+            font-size: 12px;
+            border-bottom: 1px solid #1e293b;
+        }
+
+        td a {
+            color: #38bdf8;
+            text-decoration: none;
+        }
+
+        .mono {
+            font-family: Consolas, monospace;
+        }
+
+        .alert-card {
+            background: #0b1120;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 18px;
+        }
+
+        .alert-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .alert-item label {
+            display: block;
+            color: #64748b;
+            font-size: 10px;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .alert-item span {
+            font-size: 12px;
+        }
+
+        .note-form textarea,
+        .resolution-form textarea {
+            width: 100%;
+            background: #0b1120;
+            border: 1px solid #334155;
+            color: #e5e7eb;
+            border-radius: 7px;
+            padding: 12px;
+            resize: vertical;
+            outline: none;
+        }
+
+        textarea:focus,
+        select:focus {
+            border-color: #38bdf8;
+        }
+
+        .btn {
+            display: inline-block;
+            margin-top: 10px;
+            border: none;
+            border-radius: 6px;
+            padding: 9px 15px;
+            background: #0284c7;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        select {
+            background: #0b1120;
+            color: #e5e7eb;
+            border: 1px solid #334155;
+            padding: 9px 11px;
+            border-radius: 6px;
+        }
+
+        .timeline-entry {
+            border-left: 2px solid #0ea5e9;
+            padding-left: 18px;
+            margin-bottom: 20px;
+        }
+
+        .timeline-entry h3 {
+            font-size: 13px;
+        }
+
+        .timeline-entry p {
+            color: #94a3b8;
+            font-size: 12px;
+            margin-top: 6px;
+            line-height: 1.6;
+        }
+
+        .timeline-entry small {
+            color: #475569;
+            display: block;
+            margin-top: 6px;
+        }
+
+        .note {
+            background: #0b1120;
+            border: 1px solid #1e293b;
+            border-radius: 7px;
+            padding: 14px;
+            margin-bottom: 10px;
+        }
+
+        .note-meta {
+            color: #64748b;
+            font-size: 10px;
+            margin-bottom: 7px;
+        }
+
+        .note-text {
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .empty {
+            color: #64748b;
+            font-size: 12px;
+        }
+
+        @media (max-width: 1000px) {
+            .sidebar {
+                display: none;
+            }
+
+            .main {
+                margin-left: 0;
+                width: 100%;
+                padding: 20px;
+            }
+
+            .overview,
+            .alert-grid,
+            .details {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 650px) {
+            .overview,
+            .alert-grid,
+            .details {
+                grid-template-columns: 1fr;
+            }
+
+            .header {
+                display: block;
+            }
+
+            .back {
+                display: inline-block;
+                margin-top: 15px;
+            }
+        }
+    </style>
 </head>
+
 <body>
 
-<h1>CyberDefender SOC Suite</h1>
-<h2>Incident #{{ incident.id }}</h2>
-
-{% with messages = get_flashed_messages(with_categories=true) %}
-    {% for category, message in messages %}
-        <p><strong>{{ message }}</strong></p>
-    {% endfor %}
-{% endwith %}
-
-<hr>
-
-<h3>Incident Information</h3>
-
-<p>
-    <strong>Title:</strong>
-    {{ incident.title }}
-</p>
-
-<p>
-    <strong>Description:</strong>
-    {{ incident.description or "No description provided." }}
-</p>
-
-<p>
-    <strong>Severity:</strong>
-    {{ incident.severity }}
-</p>
-
-<p>
-    <strong>Status:</strong>
-    {{ incident.status }}
-</p>
-
-<p>
-    <strong>Created:</strong>
-    {{ incident.created_at }}
-</p>
-
-<p>
-    <strong>Last Updated:</strong>
-    {{ incident.updated_at }}
-</p>
-
-<p>
-    <strong>Resolved At:</strong>
-    {{ incident.resolved_at or "Not resolved" }}
-</p>
-
-<p>
-    <strong>Assigned To:</strong>
-
-    {% if assigned_user %}
-        {{ assigned_user.username }}
-    {% else %}
-        Unassigned
-    {% endif %}
-</p>
-
-{% if incident.resolution %}
-<p>
-    <strong>Resolution:</strong>
-    {{ incident.resolution }}
-</p>
-{% endif %}
-
-{% if originating_alert %}
-<hr>
-
-<h3>Originating Alert</h3>
-
-<table border="1" cellpadding="8" cellspacing="0">
-    <tr>
-        <th>Alert ID</th>
-        <td>#{{ originating_alert.id }}</td>
-    </tr>
-
-    <tr>
-        <th>Alert Type</th>
-        <td>{{ originating_alert.alert_type }}</td>
-    </tr>
-
-    <tr>
-        <th>Detection Rule</th>
-        <td>{{ originating_alert.detection_rule }}</td>
-    </tr>
-
-    <tr>
-        <th>Severity</th>
-        <td>{{ originating_alert.severity }}</td>
-    </tr>
-
-    <tr>
-        <th>Risk Score</th>
-        <td>{{ originating_alert.risk_score }}/100</td>
-    </tr>
-
-    <tr>
-        <th>Source IP</th>
-        <td>{{ originating_alert.source_ip or "N/A" }}</td>
-    </tr>
-
-    <tr>
-        <th>Alert Status</th>
-        <td>{{ originating_alert.status }}</td>
-    </tr>
-</table>
-
-<br>
-
-<a href="{{ url_for(
-    'alerts.alert_detail',
-    alert_id=originating_alert.id
-) }}">
-    View Originating Alert
-</a>
-{% endif %}
-
-<h3>Indicators of Compromise</h3>
-
-{% if incident_iocs %}
-<table border="1" cellpadding="8" cellspacing="0">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Type</th>
-            <th>Value</th>
-            <th>Threat Level</th>
-            <th>Confidence</th>
-            <th>Source</th>
-        </tr>
-    </thead>
-
-    <tbody>
-        {% for ioc in incident_iocs %}
-        <tr>
-            <td>
-                <a href="{{ url_for('iocs.detail', ioc_id=ioc.id) }}">
-                    #{{ ioc.id }}
-                </a>
-            </td>
-
-            <td>{{ ioc.type }}</td>
-
-            <td>{{ ioc.value }}</td>
-
-            <td>{{ ioc.threat_level }}</td>
-
-            <td>{{ ioc.confidence }}%</td>
-
-            <td>{{ ioc.source or "Unknown" }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-{% else %}
-<p>No Indicators of Compromise are linked to this incident.</p>
-{% endif %}
-
-<hr>
-
-<h3>Evidence</h3>
-
-{% if incident.evidence %}
-<table border="1" cellpadding="8" cellspacing="0">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Type</th>
-            <th>Title</th>
-            <th>Hash</th>
-            <th>Collected At</th>
-        </tr>
-    </thead>
-
-    <tbody>
-        {% for item in incident.evidence %}
-        <tr>
-            <td>
-                <a href="{{ url_for('evidence.detail', evidence_id=item.id) }}">
-                    #{{ item.id }}
-                </a>
-            </td>
+<div class="layout">
 
-            <td>{{ item.evidence_type }}</td>
+<aside class="sidebar">
 
-            <td>{{ item.title }}</td>
+    <div class="brand">CYBERDEFENDER</div>
+    <div class="brand-subtitle">SOC SUITE</div>
 
-            <td>{{ item.hash_value or "Not provided" }}</td>
+    <div class="nav-title">Operations</div>
 
-            <td>{{ item.collected_at }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-{% else %}
-<p>No evidence is linked to this incident.</p>
-{% endif %}
+    <nav class="nav">
+        <a href="{{ url_for('dashboard.index') }}">Dashboard</a>
+        <a href="{{ url_for('alerts.alert_dashboard') }}">Alerts</a>
+        <a href="{{ url_for('incidents.index') }}" class="active">Incidents</a>
+        <a href="{{ url_for('iocs.index') }}">IOC Intelligence</a>
+        <a href="{{ url_for('evidence.index') }}">Evidence</a>
+    </nav>
 
-<hr>
+    <div class="nav-title">System</div>
 
-<h3>Analyst Investigation Notes</h3>
+    <nav class="nav">
+        <a href="{{ url_for('auth.logout') }}">Logout</a>
+    </nav>
 
-<form method="POST"
-      action="{{ url_for('incidents.add_note', incident_id=incident.id) }}">
+</aside>
 
-    <label for="note">Add Investigation Note</label>
-    <br>
+<main class="main">
 
-    <textarea
-        id="note"
-        name="note"
-        rows="5"
-        cols="80"
-        placeholder="Record your investigation findings..."
-        required></textarea>
+<div class="header">
 
-    <br><br>
+    <div>
+        <h1>Incident #{{ incident.id }}</h1>
+        <p>{{ incident.title }}</p>
 
-    <button type="submit">
-        Add Note
-    </button>
+        <span class="badge {{ incident.severity }}">
+            {{ incident.severity }}
+        </span>
 
-</form>
+        <span class="badge status">
+            {{ incident.status.replace("_", " ").title() }}
+        </span>
+    </div>
 
-<br>
+    <a class="back"
+       href="{{ url_for('incidents.index') }}">
+        ← Incident Management
+    </a>
 
-{% if incident.notes %}
-<table border="1" cellpadding="8" cellspacing="0">
+</div>
 
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Analyst</th>
-            <th>Investigation Note</th>
-            <th>Created At</th>
-        </tr>
-    </thead>
+<div class="overview">
 
-    <tbody>
+    <div class="stat">
+        <div class="stat-label">Severity</div>
+        <div class="stat-value">{{ incident.severity }}</div>
+    </div>
 
-        {% for note in incident.notes|sort(attribute='created_at', reverse=true) %}
+    <div class="stat">
+        <div class="stat-label">Status</div>
+        <div class="stat-value">{{ incident.status.replace("_", " ").title() }}</div>
+    </div>
 
-        <tr>
+    <div class="stat">
+        <div class="stat-label">Assigned To</div>
+        <div class="stat-value">
+            {% if assigned_user %}
+                {{ assigned_user.username }}
+            {% else %}
+                Unassigned
+            {% endif %}
+        </div>
+    </div>
 
-            <td>
-                #{{ note.id }}
-            </td>
+    <div class="stat">
+        <div class="stat-label">Created</div>
+        <div class="stat-value">{{ incident.created_at }}</div>
+    </div>
 
-            <td>
-                {% if note.analyst %}
-                    {{ note.analyst.username }}
-                {% else %}
-                    Unknown
-                {% endif %}
-            </td>
-            
-            <td>
-                {{ note.note }}
-            </td>
+</div>
 
-            <td>
-                {{ note.created_at }}
-            </td>
+<section class="section">
 
-        </tr>
+    <div class="section-header">
+        <h2>Incident Information</h2>
+    </div>
 
-        {% endfor %}
+    <div class="section-body">
 
-    </tbody>
+        <div class="details">
 
-</table>
+            <div class="detail">
+                <label>Title</label>
+                <span>{{ incident.title }}</span>
+            </div>
 
-{% else %}
+            <div class="detail">
+                <label>Last Updated</label>
+                <span>{{ incident.updated_at }}</span>
+            </div>
 
-<p>No investigation notes have been added yet.</p>
+            <div class="detail">
+                <label>Resolved At</label>
+                <span>{{ incident.resolved_at or "Not resolved" }}</span>
+            </div>
+
+            <div class="detail">
+                <label>Assigned Analyst</label>
+                <span>
+                    {% if assigned_user %}
+                        {{ assigned_user.username }}
+                    {% else %}
+                        Unassigned
+                    {% endif %}
+                </span>
+            </div>
 
-{% endif %}
-
-<hr>
-
-<h3>Investigation Timeline</h3>
-
-{% if timeline_entries %}
-
-    {% for entry in timeline_entries %}
-
-        <div>
-            <p>
-                <strong>{{ entry.action }}</strong>
-            </p>
-
-            <p>
-                {{ entry.description }}
-            </p>
-
-            <p>
-                <small>
-                    {{ entry.created_at }}
-                </small>
-            </p>
         </div>
 
-        {% if not loop.last %}
-            <hr>
+        <br>
+
+        <div class="description">
+            {{ incident.description or "No description provided." }}
+        </div>
+
+        {% if incident.resolution %}
+            <br>
+            <div class="detail">
+                <label>Resolution</label>
+                <span>{{ incident.resolution }}</span>
+            </div>
         {% endif %}
 
-    {% endfor %}
+    </div>
 
-{% else %}
+</section>
 
-    <p>No investigation activity recorded yet.</p>
+{% if originating_alert %}
+
+<section class="section">
+
+    <div class="section-header">
+        <h2>Originating Alert</h2>
+    </div>
+
+    <div class="section-body">
+
+        <div class="alert-card">
+
+            <div class="alert-grid">
+
+                <div class="alert-item">
+                    <label>Alert ID</label>
+                    <span>#{{ originating_alert.id }}</span>
+                </div>
+
+                <div class="alert-item">
+                    <label>Alert Type</label>
+                    <span>{{ originating_alert.alert_type }}</span>
+                </div>
+
+                <div class="alert-item">
+                    <label>Detection Rule</label>
+                    <span class="mono">{{ originating_alert.detection_rule }}</span>
+                </div>
+
+                <div class="alert-item">
+                    <label>Severity</label>
+                    <span>{{ originating_alert.severity }}</span>
+                </div>
+
+                <div class="alert-item">
+                    <label>Risk Score</label>
+                    <span>{{ originating_alert.risk_score }}/100</span>
+                </div>
+
+                <div class="alert-item">
+                    <label>Source IP</label>
+                    <span class="mono">
+                        {{ originating_alert.source_ip or "N/A" }}
+                    </span>
+                </div>
+
+            </div>
+
+            <br>
+
+            <a href="{{ url_for('alerts.alert_detail', alert_id=originating_alert.id) }}"
+               style="color:#38bdf8;text-decoration:none;font-size:12px;">
+                View Originating Alert →
+            </a>
+
+        </div>
+
+    </div>
+
+</section>
 
 {% endif %}
 
-<hr>
+<section class="section">
 
-<h3>Update Status</h3>
+    <div class="section-header">
+        <h2>Indicators of Compromise</h2>
+    </div>
 
-<form method="POST"
-      action="{{ url_for('incidents.update_status', incident_id=incident.id) }}">
+    <div class="section-body">
 
-    <select name="status">
+        {% if incident_iocs %}
 
-        <option value="{{ incident.status }}" selected>
-            {{ incident.status.replace("_", " ").title() }}
-            (Current)
-        </option>
+        <table>
 
-        {% for status in allowed_next_statuses %}
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Type</th>
+                    <th>Value</th>
+                    <th>Threat Level</th>
+                    <th>Confidence</th>
+                    <th>Source</th>
+                </tr>
+            </thead>
 
-            <option value="{{ status }}">
-                {{ status.replace("_", " ").title() }}
-            </option>
+            <tbody>
 
-        {% endfor %}
+            {% for ioc in incident_iocs %}
 
-    </select>
+                <tr>
 
-    <button type="submit">
-        Update Status
-    </button>
+                    <td>
+                        <a href="{{ url_for('iocs.detail', ioc_id=ioc.id) }}">
+                            #{{ ioc.id }}
+                        </a>
+                    </td>
 
-</form>
+                    <td>{{ ioc.type }}</td>
 
-<hr>
+                    <td class="mono">{{ ioc.value }}</td>
 
-<h3>Assign Incident</h3>
+                    <td>{{ ioc.threat_level }}</td>
 
-<form method="POST"
-      action="{{ url_for('incidents.assign_incident', incident_id=incident.id) }}">
+                    <td>{{ ioc.confidence }}%</td>
 
-    <select name="assigned_to">
+                    <td>{{ ioc.source or "Unknown" }}</td>
 
-        <option value="">Unassigned</option>
+                </tr>
 
-        {% for user in incident_users %}
-            <option
-                value="{{ user.id }}"
-                {% if incident.assigned_to == user.id %}selected{% endif %}
-            >
-                {{ user.username }} ({{ user.role }})
-            </option>
-        {% endfor %}
+            {% endfor %}
 
-    </select>
+            </tbody>
 
-    <button type="submit">
-        Update Assignment
-    </button>
+        </table>
 
-</form>
+        {% else %}
 
-<hr>
+            <p class="empty">
+                No Indicators of Compromise are linked to this incident.
+            </p>
 
-<h3>Resolve Incident</h3>
+        {% endif %}
 
-<form method="POST"
-      action="{{ url_for('incidents.resolve', incident_id=incident.id) }}">
+    </div>
 
-    <textarea
-        name="resolution"
-        rows="5"
-        cols="60"
-        placeholder="Enter resolution details..."
-        required
-    ></textarea>
+</section>
 
-    <br><br>
+<section class="section">
 
-    <button type="submit">
-        Resolve Incident
-    </button>
+    <div class="section-header">
+        <h2>Evidence</h2>
+    </div>
 
-</form>
+    <div class="section-body">
 
-<hr>
+        {% if incident.evidence %}
 
-<a href="{{ url_for('incidents.index') }}">
-    Back to Incidents
-</a>
+        <table>
 
-<br><br>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Type</th>
+                    <th>Title</th>
+                    <th>Hash</th>
+                    <th>Collected At</th>
+                </tr>
+            </thead>
 
-<a href="{{ url_for('dashboard.index') }}">
-    Back to Dashboard
-</a>
+            <tbody>
+
+            {% for item in incident.evidence %}
+
+                <tr>
+
+                    <td>
+                        <a href="{{ url_for('evidence.detail', evidence_id=item.id) }}">
+                            #{{ item.id }}
+                        </a>
+                    </td>
+
+                    <td>{{ item.evidence_type }}</td>
+
+                    <td>{{ item.title }}</td>
+
+                    <td class="mono">
+                        {{ item.hash_value or "Not provided" }}
+                    </td>
+
+                    <td>{{ item.collected_at }}</td>
+
+                </tr>
+
+            {% endfor %}
+
+            </tbody>
+
+        </table>
+
+        {% else %}
+
+            <p class="empty">
+                No evidence is linked to this incident.
+            </p>
+
+        {% endif %}
+
+    </div>
+
+</section>
+
+<section class="section">
+
+    <div class="section-header">
+        <h2>Analyst Investigation Notes</h2>
+    </div>
+
+    <div class="section-body">
+
+        <form class="note-form"
+              method="POST"
+              action="{{ url_for('incidents.add_note', incident_id=incident.id) }}">
+
+            <textarea
+                name="note"
+                rows="5"
+                placeholder="Record your investigation findings..."
+                required></textarea>
+
+            <button class="btn" type="submit">
+                Add Investigation Note
+            </button>
+
+        </form>
+
+        <br>
+
+        {% if incident.notes %}
+
+            {% for note in incident.notes|sort(attribute='created_at', reverse=true) %}
+
+            <div class="note">
+
+                <div class="note-meta">
+
+                    {% if note.analyst %}
+                        {{ note.analyst.username }}
+                    {% else %}
+                        Unknown
+                    {% endif %}
+
+                    · {{ note.created_at }}
+
+                </div>
+
+                <div class="note-text">
+                    {{ note.note }}
+                </div>
+
+            </div>
+
+            {% endfor %}
+
+        {% else %}
+
+            <p class="empty">
+                No investigation notes have been added yet.
+            </p>
+
+        {% endif %}
+
+    </div>
+
+</section>
+
+<section class="section">
+
+    <div class="section-header">
+        <h2>Investigation Timeline</h2>
+    </div>
+
+    <div class="section-body">
+
+        {% if timeline_entries %}
+
+            {% for entry in timeline_entries %}
+
+            <div class="timeline-entry">
+
+                <h3>{{ entry.action }}</h3>
+
+                <p>{{ entry.description }}</p>
+
+                <small>{{ entry.created_at }}</small>
+
+            </div>
+
+            {% endfor %}
+
+        {% else %}
+
+            <p class="empty">
+                No investigation activity recorded yet.
+            </p>
+
+        {% endif %}
+
+    </div>
+
+</section>
+
+<section class="section">
+
+    <div class="section-header">
+        <h2>Investigation Controls</h2>
+    </div>
+
+    <div class="section-body">
+
+        <div class="actions">
+
+            <form method="POST"
+                  action="{{ url_for('incidents.update_status', incident_id=incident.id) }}">
+
+                <select name="status">
+
+                    <option value="{{ incident.status }}" selected>
+                        {{ incident.status.replace("_", " ").title() }}
+                        (Current)
+                    </option>
+
+                    {% for status in allowed_next_statuses %}
+
+                        <option value="{{ status }}">
+                            {{ status.replace("_", " ").title() }}
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+                <button class="btn" type="submit">
+                    Update Status
+                </button>
+
+            </form>
+
+            <form method="POST"
+                  action="{{ url_for('incidents.assign_incident', incident_id=incident.id) }}">
+
+                <select name="assigned_to">
+
+                    <option value="">Unassigned</option>
+
+                    {% for user in incident_users %}
+
+                        <option value="{{ user.id }}"
+                            {% if incident.assigned_to == user.id %}selected{% endif %}>
+
+                            {{ user.username }} ({{ user.role }})
+
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+                <button class="btn" type="submit">
+                    Update Assignment
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</section>
+
+<section class="section">
+
+    <div class="section-header">
+        <h2>Resolve Incident</h2>
+    </div>
+
+    <div class="section-body">
+
+        <form class="resolution-form"
+              method="POST"
+              action="{{ url_for('incidents.resolve', incident_id=incident.id) }}">
+
+            <textarea
+                name="resolution"
+                rows="5"
+                placeholder="Enter resolution details..."
+                required></textarea>
+
+            <button class="btn" type="submit">
+                Resolve Incident
+            </button>
+
+        </form>
+
+    </div>
+
+</section>
+
+</main>
+
+</div>
 
 </body>
 </html>

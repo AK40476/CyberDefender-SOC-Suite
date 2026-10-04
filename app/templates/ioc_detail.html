@@ -2,99 +2,452 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>IOC #{{ ioc.id }} - CyberDefender SOC Suite</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #0b1120;
+            color: #e5e7eb;
+            min-height: 100vh;
+        }
+
+        .layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 240px;
+            background: #080d18;
+            border-right: 1px solid #1e293b;
+            padding: 25px 18px;
+            position: fixed;
+            height: 100vh;
+        }
+
+        .brand {
+            color: #38bdf8;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .brand-subtitle {
+            color: #64748b;
+            font-size: 11px;
+            margin-top: 5px;
+            margin-bottom: 35px;
+        }
+
+        .nav-title {
+            color: #475569;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 20px 10px 10px;
+        }
+
+        .nav a {
+            display: block;
+            color: #94a3b8;
+            text-decoration: none;
+            padding: 11px 12px;
+            border-radius: 7px;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .nav a:hover,
+        .nav a.active {
+            background: #0f2436;
+            color: #38bdf8;
+        }
+
+        .main {
+            margin-left: 240px;
+            width: calc(100% - 240px);
+            padding: 30px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 25px;
+        }
+
+        .header h1 {
+            font-size: 26px;
+        }
+
+        .header p {
+            color: #64748b;
+            font-size: 12px;
+            margin-top: 7px;
+        }
+
+        .back {
+            color: #38bdf8;
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
+
+        .panel {
+            background: #111827;
+            border: 1px solid #1e293b;
+            border-radius: 11px;
+            padding: 24px;
+        }
+
+        .panel h2 {
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        .info-row {
+            display: grid;
+            grid-template-columns: 160px 1fr;
+            gap: 15px;
+            padding: 14px 0;
+            border-bottom: 1px solid #1e293b;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .label {
+            color: #64748b;
+            font-size: 10px;
+            text-transform: uppercase;
+        }
+
+        .value {
+            font-size: 13px;
+            word-break: break-word;
+        }
+
+        .ioc-value {
+            font-family: Consolas, monospace;
+            color: #38bdf8;
+        }
+
+        .threat {
+            display: inline-block;
+            padding: 5px 9px;
+            border-radius: 5px;
+            font-size: 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .threat-critical {
+            background: #3b1118;
+            color: #fb7185;
+        }
+
+        .threat-high {
+            background: #3a2410;
+            color: #fb923c;
+        }
+
+        .threat-medium {
+            background: #332b0a;
+            color: #facc15;
+        }
+
+        .threat-low {
+            background: #0c2b25;
+            color: #34d399;
+        }
+
+        .threat-unknown {
+            background: #1e293b;
+            color: #94a3b8;
+        }
+
+        .confidence {
+            font-size: 20px;
+            font-weight: bold;
+            color: #38bdf8;
+        }
+
+        .incident-card {
+            background: #0b1120;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 18px;
+        }
+
+        .incident-id {
+            color: #38bdf8;
+            font-size: 17px;
+            font-weight: bold;
+        }
+
+        .incident-title {
+            color: #cbd5e1;
+            font-size: 13px;
+            margin-top: 8px;
+        }
+
+        .incident-status {
+            color: #64748b;
+            font-size: 11px;
+            margin-top: 10px;
+        }
+
+        .incident-link {
+            display: inline-block;
+            margin-top: 15px;
+            color: #38bdf8;
+            text-decoration: none;
+            font-size: 12px;
+        }
+
+        .bottom {
+            margin-top: 25px;
+        }
+
+        .bottom a {
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+        @media (max-width: 850px) {
+
+            .sidebar {
+                display: none;
+            }
+
+            .main {
+                margin-left: 0;
+                width: 100%;
+                padding: 20px;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .info-row {
+                grid-template-columns: 1fr;
+                gap: 5px;
+            }
+
+            .header {
+                display: block;
+            }
+
+            .back {
+                display: inline-block;
+                margin-top: 15px;
+            }
+        }
+    </style>
 </head>
 
 <body>
 
-<h1>CyberDefender SOC Suite</h1>
-<h2>IOC #{{ ioc.id }}</h2>
+<div class="layout">
 
-<hr>
+<aside class="sidebar">
 
-<h3>IOC Information</h3>
+    <div class="brand">CYBERDEFENDER</div>
+    <div class="brand-subtitle">SOC SUITE</div>
 
-<p>
-    <strong>Type:</strong>
-    {{ ioc.type }}
-</p>
+    <div class="nav-title">Operations</div>
 
-<p>
-    <strong>Value:</strong>
-    {{ ioc.value }}
-</p>
+    <nav class="nav">
+        <a href="{{ url_for('dashboard.index') }}">Dashboard</a>
+        <a href="{{ url_for('alerts.alert_dashboard') }}">Alerts</a>
+        <a href="{{ url_for('incidents.index') }}">Incidents</a>
+        <a href="{{ url_for('iocs.index') }}" class="active">IOC Intelligence</a>
+        <a href="{{ url_for('evidence.index') }}">Evidence</a>
+    </nav>
 
-<p>
-    <strong>Threat Level:</strong>
-    {{ ioc.threat_level }}
-</p>
+    <div class="nav-title">System</div>
 
-<p>
-    <strong>Confidence:</strong>
-    {{ ioc.confidence }}%
-</p>
+    <nav class="nav">
+        <a href="{{ url_for('auth.logout') }}">Logout</a>
+    </nav>
 
-<p>
-    <strong>Source:</strong>
-    {{ ioc.source or "Unknown" }}
-</p>
+</aside>
 
-<p>
-    <strong>First Seen:</strong>
-    {{ ioc.first_seen or "Unknown" }}
-</p>
+<main class="main">
 
-<p>
-    <strong>Last Seen:</strong>
-    {{ ioc.last_seen or "Unknown" }}
-</p>
+    <div class="header">
 
-<p>
-    <strong>Created:</strong>
-    {{ ioc.created_at }}
-</p>
+        <div>
+            <h1>IOC #{{ ioc.id }}</h1>
+            <p>Indicator of Compromise intelligence record</p>
+        </div>
 
-<hr>
-
-<h3>Related Incident</h3>
-
-{% if ioc.incident %}
-
-    <p>
-        <a href="{{ url_for('incidents.detail', incident_id=ioc.incident.id) }}">
-            🚨 Incident #{{ ioc.incident.id }}
+        <a class="back"
+           href="{{ url_for('iocs.index') }}">
+            ← IOC Intelligence
         </a>
-    </p>
 
-    <p>
-        <strong>Title:</strong>
-        {{ ioc.incident.title }}
-    </p>
+    </div>
 
-    <p>
-        <strong>Status:</strong>
-        {{ ioc.incident.status }}
-    </p>
+    <div class="grid">
 
-{% else %}
+        <section class="panel">
 
-    <p>
-        This IOC is not linked to an incident.
-    </p>
+            <h2>IOC Information</h2>
 
-{% endif %}
+            <div class="info-row">
 
-<hr>
+                <div class="label">Type</div>
 
-<a href="{{ url_for('iocs.index') }}">
-    ← Back to IOC Management
-</a>
+                <div class="value">
+                    {{ ioc.type }}
+                </div>
 
-<br><br>
+            </div>
 
-<a href="{{ url_for('dashboard.index') }}">
-    ← Back to Dashboard
-</a>
+            <div class="info-row">
+
+                <div class="label">IOC Value</div>
+
+                <div class="value ioc-value">
+                    {{ ioc.value }}
+                </div>
+
+            </div>
+
+            <div class="info-row">
+
+                <div class="label">Threat Level</div>
+
+                <div class="value">
+
+                    <span class="threat threat-{{ ioc.threat_level }}">
+                        {{ ioc.threat_level }}
+                    </span>
+
+                </div>
+
+            </div>
+
+            <div class="info-row">
+
+                <div class="label">Confidence</div>
+
+                <div class="value confidence">
+                    {{ ioc.confidence }}%
+                </div>
+
+            </div>
+
+            <div class="info-row">
+
+                <div class="label">Source</div>
+
+                <div class="value">
+                    {{ ioc.source or "Unknown" }}
+                </div>
+
+            </div>
+
+            <div class="info-row">
+
+                <div class="label">First Seen</div>
+
+                <div class="value">
+                    {{ ioc.first_seen or "Unknown" }}
+                </div>
+
+            </div>
+
+            <div class="info-row">
+
+                <div class="label">Last Seen</div>
+
+                <div class="value">
+                    {{ ioc.last_seen or "Unknown" }}
+                </div>
+
+            </div>
+
+            <div class="info-row">
+
+                <div class="label">Created</div>
+
+                <div class="value">
+                    {{ ioc.created_at }}
+                </div>
+
+            </div>
+
+        </section>
+
+        <aside class="panel">
+
+            <h2>Related Incident</h2>
+
+            {% if ioc.incident %}
+
+                <div class="incident-card">
+
+                    <div class="incident-id">
+                        Incident #{{ ioc.incident.id }}
+                    </div>
+
+                    <div class="incident-title">
+                        {{ ioc.incident.title }}
+                    </div>
+
+                    <div class="incident-status">
+                        Status:
+                        {{ ioc.incident.status.replace("_", " ").title() }}
+                    </div>
+
+                    <a class="incident-link"
+                       href="{{ url_for('incidents.detail', incident_id=ioc.incident.id) }}">
+                        View Incident →
+                    </a>
+
+                </div>
+
+            {% else %}
+
+                <p style="color:#64748b;font-size:12px;">
+                    This IOC is not linked to an incident.
+                </p>
+
+            {% endif %}
+
+        </aside>
+
+    </div>
+
+    <div class="bottom">
+
+        <a href="{{ url_for('dashboard.index') }}">
+            ← Back to Dashboard
+        </a>
+
+    </div>
+
+</main>
+
+</div>
 
 </body>
 </html>

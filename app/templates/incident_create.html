@@ -2,62 +2,319 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Create Incident - CyberDefender SOC Suite</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #0b1120;
+            color: #e5e7eb;
+            min-height: 100vh;
+        }
+
+        .layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 240px;
+            background: #080d18;
+            border-right: 1px solid #1e293b;
+            padding: 25px 18px;
+            position: fixed;
+            height: 100vh;
+        }
+
+        .brand {
+            color: #38bdf8;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .brand-subtitle {
+            color: #64748b;
+            font-size: 11px;
+            margin-top: 5px;
+            margin-bottom: 35px;
+        }
+
+        .nav-title {
+            color: #475569;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 20px 10px 10px;
+        }
+
+        .nav a {
+            display: block;
+            color: #94a3b8;
+            text-decoration: none;
+            padding: 11px 12px;
+            border-radius: 7px;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .nav a:hover,
+        .nav a.active {
+            background: #0f2436;
+            color: #38bdf8;
+        }
+
+        .main {
+            margin-left: 240px;
+            width: calc(100% - 240px);
+            padding: 30px;
+        }
+
+        .topbar {
+            margin-bottom: 28px;
+        }
+
+        .topbar h1 {
+            font-size: 26px;
+        }
+
+        .topbar p {
+            color: #64748b;
+            font-size: 13px;
+            margin-top: 7px;
+        }
+
+        .panel {
+            max-width: 850px;
+            background: #111827;
+            border: 1px solid #1e293b;
+            border-radius: 12px;
+            padding: 28px;
+        }
+
+        .panel-header {
+            padding-bottom: 18px;
+            border-bottom: 1px solid #1e293b;
+            margin-bottom: 25px;
+        }
+
+        .panel-header h2 {
+            font-size: 17px;
+        }
+
+        .panel-header p {
+            color: #64748b;
+            font-size: 12px;
+            margin-top: 6px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            color: #cbd5e1;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        input,
+        textarea,
+        select {
+            width: 100%;
+            background: #0b1120;
+            border: 1px solid #334155;
+            color: #e5e7eb;
+            border-radius: 7px;
+            padding: 11px 12px;
+            font-size: 13px;
+            outline: none;
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            border-color: #38bdf8;
+        }
+
+        textarea {
+            resize: vertical;
+        }
+
+        .actions {
+            border-top: 1px solid #1e293b;
+            padding-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        button,
+        .cancel {
+            border: none;
+            border-radius: 7px;
+            padding: 11px 18px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        button {
+            background: #0284c7;
+            color: white;
+        }
+
+        button:hover {
+            background: #0369a1;
+        }
+
+        .cancel {
+            background: #1e293b;
+            color: #cbd5e1;
+        }
+
+        .flash {
+            max-width: 850px;
+            background: #172033;
+            border: 1px solid #334155;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 800px) {
+            .sidebar {
+                display: none;
+            }
+
+            .main {
+                margin-left: 0;
+                width: 100%;
+                padding: 20px;
+            }
+        }
+    </style>
 </head>
+
 <body>
 
-<h1>CyberDefender SOC Suite</h1>
-<h2>Create New Incident</h2>
+<div class="layout">
 
-{% with messages = get_flashed_messages(with_categories=true) %}
-    {% for category, message in messages %}
-        <p><strong>{{ message }}</strong></p>
-    {% endfor %}
-{% endwith %}
+    <aside class="sidebar">
 
-<form method="POST">
+        <div class="brand">CYBERDEFENDER</div>
+        <div class="brand-subtitle">SOC SUITE</div>
 
-    <p>
-        <label>Title:</label><br>
-        <input
-            type="text"
-            name="title"
-            required
-            maxlength="150"
-        >
-    </p>
+        <div class="nav-title">Operations</div>
 
-    <p>
-        <label>Description:</label><br>
-        <textarea
-            name="description"
-            rows="6"
-            cols="60"
-        ></textarea>
-    </p>
+        <nav class="nav">
+            <a href="{{ url_for('dashboard.index') }}">Dashboard</a>
+            <a href="{{ url_for('alerts.alert_dashboard') }}">Alerts</a>
+            <a href="{{ url_for('incidents.index') }}" class="active">Incidents</a>
+            <a href="{{ url_for('iocs.index') }}">IOC Intelligence</a>
+            <a href="{{ url_for('evidence.index') }}">Evidence</a>
+        </nav>
 
-    <p>
-        <label>Severity:</label><br>
+        <div class="nav-title">System</div>
 
-        <select name="severity" required>
-            <option value="low">Low</option>
-            <option value="medium" selected>Medium</option>
-            <option value="high">High</option>
-            <option value="critical">Critical</option>
-        </select>
-    </p>
+        <nav class="nav">
+            <a href="{{ url_for('auth.logout') }}">Logout</a>
+        </nav>
 
-    <button type="submit">
-        Create Incident
-    </button>
+    </aside>
 
-</form>
+    <main class="main">
 
-<br>
+        <div class="topbar">
+            <h1>Create New Incident</h1>
+            <p>Record and initiate a security incident investigation.</p>
+        </div>
 
-<a href="{{ url_for('incidents.index') }}">
-    Back to Incidents
-</a>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+                <div class="flash">
+                    <strong>{{ message }}</strong>
+                </div>
+            {% endfor %}
+        {% endwith %}
+
+        <section class="panel">
+
+            <div class="panel-header">
+                <h2>Incident Registration</h2>
+                <p>Provide the initial details required to create the incident record.</p>
+            </div>
+
+            <form method="POST">
+
+                <div class="form-group">
+                    <label for="title">Incident Title</label>
+
+                    <input
+                        id="title"
+                        type="text"
+                        name="title"
+                        maxlength="150"
+                        placeholder="e.g. Suspected Brute Force Attack"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Description</label>
+
+                    <textarea
+                        id="description"
+                        name="description"
+                        rows="7"
+                        placeholder="Describe the incident, observed activity, and initial findings..."
+                    ></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="severity">Severity</label>
+
+                    <select id="severity"
+                            name="severity"
+                            required>
+
+                        <option value="low">Low</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="high">High</option>
+                        <option value="critical">Critical</option>
+
+                    </select>
+                </div>
+
+                <div class="actions">
+
+                    <button type="submit">
+                        Create Incident
+                    </button>
+
+                    <a href="{{ url_for('incidents.index') }}"
+                       class="cancel">
+                        Cancel
+                    </a>
+
+                </div>
+
+            </form>
+
+        </section>
+
+    </main>
+
+</div>
 
 </body>
 </html>

@@ -2,116 +2,425 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Evidence - CyberDefender SOC Suite</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #0b1120;
+            color: #e5e7eb;
+            min-height: 100vh;
+        }
+
+        .layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 240px;
+            background: #080d18;
+            border-right: 1px solid #1e293b;
+            padding: 25px 18px;
+            position: fixed;
+            height: 100vh;
+        }
+
+        .brand {
+            color: #38bdf8;
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .brand-subtitle {
+            color: #64748b;
+            font-size: 11px;
+            margin-bottom: 35px;
+        }
+
+        .nav-title {
+            color: #475569;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 20px 10px 10px;
+        }
+
+        .nav a {
+            display: block;
+            color: #94a3b8;
+            text-decoration: none;
+            padding: 11px 12px;
+            border-radius: 7px;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .nav a:hover {
+            background: #111827;
+            color: #38bdf8;
+        }
+
+        .nav a.active {
+            background: #0f2436;
+            color: #38bdf8;
+            border-left: 3px solid #38bdf8;
+        }
+
+        .main {
+            margin-left: 240px;
+            width: calc(100% - 240px);
+            padding: 30px;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .page-title h1 {
+            font-size: 26px;
+            margin-bottom: 7px;
+        }
+
+        .page-title p {
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        .back-link {
+            color: #38bdf8;
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+        .panel {
+            max-width: 900px;
+            background: #111827;
+            border: 1px solid #1e293b;
+            border-radius: 12px;
+            padding: 28px;
+        }
+
+        .panel-header {
+            border-bottom: 1px solid #1e293b;
+            padding-bottom: 18px;
+            margin-bottom: 25px;
+        }
+
+        .panel-header h2 {
+            font-size: 18px;
+        }
+
+        .panel-header p {
+            color: #64748b;
+            font-size: 12px;
+            margin-top: 6px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.full {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            color: #cbd5e1;
+            font-size: 13px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            background: #0b1120;
+            border: 1px solid #334155;
+            color: #e5e7eb;
+            border-radius: 7px;
+            padding: 11px 12px;
+            font-size: 13px;
+            outline: none;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            border-color: #38bdf8;
+            box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.08);
+        }
+
+        textarea {
+            resize: vertical;
+        }
+
+        .hint {
+            color: #64748b;
+            font-size: 11px;
+            margin-top: 6px;
+        }
+
+        .actions {
+            margin-top: 28px;
+            padding-top: 20px;
+            border-top: 1px solid #1e293b;
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            border: none;
+            border-radius: 7px;
+            padding: 11px 18px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: #0284c7;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0369a1;
+        }
+
+        .btn-secondary {
+            background: #1e293b;
+            color: #cbd5e1;
+        }
+
+        .btn-secondary:hover {
+            background: #334155;
+        }
+
+        .flash {
+            max-width: 900px;
+            background: #172033;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 12px 15px;
+            margin-bottom: 20px;
+            font-size: 13px;
+        }
+
+        @media (max-width: 800px) {
+            .sidebar {
+                display: none;
+            }
+
+            .main {
+                margin-left: 0;
+                width: 100%;
+                padding: 20px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-group.full {
+                grid-column: auto;
+            }
+        }
+    </style>
 </head>
+
 <body>
 
-<h1>CyberDefender SOC Suite</h1>
-<h2>Add Investigation Evidence</h2>
+<div class="layout">
 
-{% with messages = get_flashed_messages(with_categories=true) %}
-    {% for category, message in messages %}
-        <p><strong>{{ message }}</strong></p>
-    {% endfor %}
-{% endwith %}
+    <aside class="sidebar">
+        <div class="brand">CYBERDEFENDER</div>
+        <div class="brand-subtitle">SOC SUITE</div>
 
-<hr>
+        <div class="nav-title">Operations</div>
 
-<form method="POST">
+        <nav class="nav">
+            <a href="{{ url_for('dashboard.index') }}">Dashboard</a>
+            <a href="{{ url_for('alerts.alert_dashboard') }}">Alerts</a>
+            <a href="{{ url_for('incidents.index') }}">Incidents</a>
+            <a href="{{ url_for('iocs.index') }}">IOC Intelligence</a>
+            <a href="{{ url_for('evidence.index') }}" class="active">Evidence</a>
+        </nav>
 
-    <p>
-        <label>Incident:</label><br>
+        <div class="nav-title">System</div>
 
-        <select name="incident_id" required>
-            <option value="">Select Incident</option>
+        <nav class="nav">
+            <a href="{{ url_for('auth.logout') }}">Logout</a>
+        </nav>
+    </aside>
 
-            {% for incident in incidents %}
-                <option value="{{ incident.id }}">
-                    Incident #{{ incident.id }} - {{ incident.title }}
-                </option>
+    <main class="main">
+
+        <div class="topbar">
+            <div class="page-title">
+                <h1>Add Investigation Evidence</h1>
+                <p>Register and associate forensic evidence with an incident.</p>
+            </div>
+
+            <a class="back-link"
+               href="{{ url_for('evidence.index') }}">
+                ← Evidence Repository
+            </a>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+                <div class="flash">
+                    <strong>{{ message }}</strong>
+                </div>
             {% endfor %}
+        {% endwith %}
 
-        </select>
-    </p>
+        <section class="panel">
 
-    <p>
-        <label>Evidence Type:</label><br>
+            <div class="panel-header">
+                <h2>Evidence Registration</h2>
+                <p>Enter the available evidence metadata and integrity information.</p>
+            </div>
 
-        <select name="evidence_type" required>
-            <option value="">Select Evidence Type</option>
-            <option value="log">Log File</option>
-            <option value="screenshot">Screenshot</option>
-            <option value="network_capture">Network Capture</option>
-            <option value="malware_sample">Malware Sample</option>
-            <option value="document">Document</option>
-            <option value="other">Other</option>
-        </select>
-    </p>
+            <form method="POST">
 
-    <p>
-        <label>Evidence Title:</label><br>
+                <div class="form-grid">
 
-        <input
-            type="text"
-            name="title"
-            maxlength="150"
-            placeholder="e.g. Brute Force Authentication Logs"
-            required
-        >
-    </p>
+                    <div class="form-group">
+                        <label for="incident_id">Related Incident</label>
 
-    <p>
-        <label>Description:</label><br>
+                        <select id="incident_id"
+                                name="incident_id"
+                                required>
 
-        <textarea
-            name="description"
-            rows="5"
-            cols="60"
-            placeholder="Describe what this evidence contains and why it is relevant..."
-        ></textarea>
-    </p>
+                            <option value="">Select Incident</option>
 
-    <p>
-        <label>File Path / Reference:</label><br>
+                            {% for incident in incidents %}
+                                <option value="{{ incident.id }}">
+                                    Incident #{{ incident.id }} - {{ incident.title }}
+                                </option>
+                            {% endfor %}
 
-        <input
-            type="text"
-            name="file_path"
-            maxlength="500"
-            placeholder="e.g. evidence/incident-2/auth.log"
-        >
-    </p>
+                        </select>
+                    </div>
 
-    <p>
-        <label>Evidence Hash:</label><br>
+                    <div class="form-group">
+                        <label for="evidence_type">Evidence Type</label>
 
-        <input
-            type="text"
-            name="hash_value"
-            maxlength="128"
-            placeholder="SHA-256 / SHA-1 / MD5"
-        >
-    </p>
+                        <select id="evidence_type"
+                                name="evidence_type"
+                                required>
 
-    <button type="submit">
-        Add Evidence
-    </button>
+                            <option value="">Select Evidence Type</option>
+                            <option value="log">Log File</option>
+                            <option value="screenshot">Screenshot</option>
+                            <option value="network_capture">Network Capture</option>
+                            <option value="malware_sample">Malware Sample</option>
+                            <option value="document">Document</option>
+                            <option value="other">Other</option>
 
-</form>
+                        </select>
+                    </div>
 
-<hr>
+                    <div class="form-group full">
+                        <label for="title">Evidence Title</label>
 
-<p>
-    <a href="{{ url_for('evidence.index') }}">
-        ← Back to Evidence Management
-    </a>
-</p>
+                        <input
+                            id="title"
+                            type="text"
+                            name="title"
+                            maxlength="150"
+                            placeholder="e.g. Brute Force Authentication Logs"
+                            required
+                        >
+                    </div>
 
-<p>
-    <a href="{{ url_for('dashboard.index') }}">
-        ← Back to Dashboard
-    </a>
-</p>
+                    <div class="form-group full">
+                        <label for="description">Description</label>
+
+                        <textarea
+                            id="description"
+                            name="description"
+                            rows="6"
+                            placeholder="Describe what this evidence contains and why it is relevant..."
+                        ></textarea>
+
+                        <span class="hint">
+                            Provide enough context for another analyst to understand the evidence.
+                        </span>
+                    </div>
+
+                    <div class="form-group full">
+                        <label for="file_path">File Path / Reference</label>
+
+                        <input
+                            id="file_path"
+                            type="text"
+                            name="file_path"
+                            maxlength="500"
+                            placeholder="e.g. evidence/incident-2/auth.log"
+                        >
+                    </div>
+
+                    <div class="form-group full">
+                        <label for="hash_value">Evidence Hash</label>
+
+                        <input
+                            id="hash_value"
+                            type="text"
+                            name="hash_value"
+                            maxlength="128"
+                            placeholder="SHA-256 / SHA-1 / MD5"
+                        >
+
+                        <span class="hint">
+                            Hash values can be used to support evidence integrity verification.
+                        </span>
+                    </div>
+
+                </div>
+
+                <div class="actions">
+
+                    <button type="submit"
+                            class="btn btn-primary">
+                        Add Evidence
+                    </button>
+
+                    <a href="{{ url_for('evidence.index') }}"
+                       class="btn btn-secondary">
+                        Cancel
+                    </a>
+
+                </div>
+
+            </form>
+
+        </section>
+
+    </main>
+
+</div>
 
 </body>
 </html>

@@ -2,123 +2,402 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Add IOC - CyberDefender SOC Suite</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #0b1120;
+            color: #e5e7eb;
+            min-height: 100vh;
+        }
+
+        .layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 240px;
+            background: #080d18;
+            border-right: 1px solid #1e293b;
+            padding: 25px 18px;
+            position: fixed;
+            height: 100vh;
+        }
+
+        .brand {
+            color: #38bdf8;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .brand-subtitle {
+            color: #64748b;
+            font-size: 11px;
+            margin-top: 5px;
+            margin-bottom: 35px;
+        }
+
+        .nav-title {
+            color: #475569;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 20px 10px 10px;
+        }
+
+        .nav a {
+            display: block;
+            color: #94a3b8;
+            text-decoration: none;
+            padding: 11px 12px;
+            border-radius: 7px;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .nav a:hover,
+        .nav a.active {
+            background: #0f2436;
+            color: #38bdf8;
+        }
+
+        .main {
+            margin-left: 240px;
+            width: calc(100% - 240px);
+            padding: 30px;
+        }
+
+        .topbar {
+            margin-bottom: 28px;
+        }
+
+        .topbar h1 {
+            font-size: 26px;
+        }
+
+        .topbar p {
+            color: #64748b;
+            font-size: 13px;
+            margin-top: 7px;
+        }
+
+        .panel {
+            max-width: 900px;
+            background: #111827;
+            border: 1px solid #1e293b;
+            border-radius: 12px;
+            padding: 28px;
+        }
+
+        .panel-header {
+            padding-bottom: 18px;
+            border-bottom: 1px solid #1e293b;
+            margin-bottom: 25px;
+        }
+
+        .panel-header h2 {
+            font-size: 17px;
+        }
+
+        .panel-header p {
+            color: #64748b;
+            font-size: 12px;
+            margin-top: 6px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .full {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            color: #cbd5e1;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        input,
+        select {
+            width: 100%;
+            background: #0b1120;
+            border: 1px solid #334155;
+            color: #e5e7eb;
+            border-radius: 7px;
+            padding: 11px;
+            font-size: 13px;
+            outline: none;
+        }
+
+        input:focus,
+        select:focus {
+            border-color: #38bdf8;
+        }
+
+        .hint {
+            color: #64748b;
+            font-size: 11px;
+            margin-top: 6px;
+        }
+
+        .actions {
+            margin-top: 28px;
+            padding-top: 20px;
+            border-top: 1px solid #1e293b;
+            display: flex;
+            gap: 10px;
+        }
+
+        button,
+        .cancel {
+            border: none;
+            border-radius: 7px;
+            padding: 11px 18px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        button {
+            background: #0284c7;
+            color: white;
+        }
+
+        button:hover {
+            background: #0369a1;
+        }
+
+        .cancel {
+            background: #1e293b;
+            color: #cbd5e1;
+        }
+
+        .flash {
+            max-width: 900px;
+            background: #172033;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 12px 15px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 800px) {
+
+            .sidebar {
+                display: none;
+            }
+
+            .main {
+                margin-left: 0;
+                width: 100%;
+                padding: 20px;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .full {
+                grid-column: auto;
+            }
+        }
+    </style>
 </head>
 
 <body>
 
-<h1>CyberDefender SOC Suite</h1>
-<h2>Add Indicator of Compromise</h2>
+<div class="layout">
 
-{% with messages = get_flashed_messages(with_categories=true) %}
-    {% for category, message in messages %}
-        <p><strong>{{ message }}</strong></p>
-    {% endfor %}
-{% endwith %}
+<aside class="sidebar">
 
-<hr>
+    <div class="brand">CYBERDEFENDER</div>
+    <div class="brand-subtitle">SOC SUITE</div>
 
-<form method="POST">
+    <div class="nav-title">Operations</div>
 
-    <p>
-        <label>IOC Type:</label><br>
+    <nav class="nav">
+        <a href="{{ url_for('dashboard.index') }}">Dashboard</a>
+        <a href="{{ url_for('alerts.alert_dashboard') }}">Alerts</a>
+        <a href="{{ url_for('incidents.index') }}">Incidents</a>
+        <a href="{{ url_for('iocs.index') }}" class="active">IOC Intelligence</a>
+        <a href="{{ url_for('evidence.index') }}">Evidence</a>
+    </nav>
 
-        <select name="type" required>
+    <div class="nav-title">System</div>
 
-            <option value="">Select Type</option>
-            <option value="ip">IP Address</option>
-            <option value="domain">Domain</option>
-            <option value="url">URL</option>
-            <option value="hash">File Hash</option>
-            <option value="email">Email</option>
+    <nav class="nav">
+        <a href="{{ url_for('auth.logout') }}">Logout</a>
+    </nav>
 
-        </select>
-    </p>
+</aside>
 
-    <p>
-        <label>IOC Value:</label><br>
+<main class="main">
 
-        <input
-            type="text"
-            name="value"
-            maxlength="500"
-            required
-        >
-    </p>
+    <div class="topbar">
+        <h1>Add Indicator of Compromise</h1>
+        <p>Register an IOC for threat intelligence and investigation tracking.</p>
+    </div>
 
-    <p>
-        <label>Threat Level:</label><br>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+            <div class="flash">
+                <strong>{{ message }}</strong>
+            </div>
+        {% endfor %}
+    {% endwith %}
 
-        <select name="threat_level">
+    <section class="panel">
 
-            <option value="unknown">Unknown</option>
-            <option value="low">Low</option>
-            <option value="medium">Medium</option>
-            <option value="high">High</option>
-            <option value="critical">Critical</option>
+        <div class="panel-header">
+            <h2>IOC Registration</h2>
+            <p>Provide the indicator, threat classification, confidence, and source.</p>
+        </div>
 
-        </select>
-    </p>
+        <form method="POST">
 
-    <p>
-        <label>Confidence:</label><br>
+            <div class="grid">
 
-        <input
-            type="number"
-            name="confidence"
-            min="0"
-            max="100"
-            value="0"
-            required
-        >
+                <div class="group">
+                    <label for="type">IOC Type</label>
 
-        %
-    </p>
+                    <select id="type" name="type" required>
 
-    <p>
-        <label>Source:</label><br>
+                        <option value="">Select Type</option>
+                        <option value="ip">IP Address</option>
+                        <option value="domain">Domain</option>
+                        <option value="url">URL</option>
+                        <option value="hash">File Hash</option>
+                        <option value="email">Email</option>
 
-        <input
-            type="text"
-            name="source"
-            maxlength="100"
-            placeholder="e.g. VirusTotal, SOC Analyst, SIEM"
-        >
-    </p>
+                    </select>
+                </div>
 
-    <p>
-        <label>Link to Incident:</label><br>
+                <div class="group">
+                    <label for="value">IOC Value</label>
 
-        <select name="incident_id">
+                    <input
+                        id="value"
+                        type="text"
+                        name="value"
+                        maxlength="500"
+                        placeholder="e.g. 192.168.200.50"
+                        required
+                    >
+                </div>
 
-            <option value="">
-                No Incident
-            </option>
+                <div class="group">
+                    <label for="threat_level">Threat Level</label>
 
-            {% for incident in incidents %}
+                    <select id="threat_level"
+                            name="threat_level">
 
-                <option value="{{ incident.id }}">
-                    Incident #{{ incident.id }} -
-                    {{ incident.title }}
-                </option>
+                        <option value="unknown">Unknown</option>
+                        <option value="low">Low</option>
+                        <option value="medium">Medium</option>
+                        <option value="high">High</option>
+                        <option value="critical">Critical</option>
 
-            {% endfor %}
+                    </select>
+                </div>
 
-        </select>
+                <div class="group">
+                    <label for="confidence">Confidence</label>
 
-    </p>
+                    <input
+                        id="confidence"
+                        type="number"
+                        name="confidence"
+                        min="0"
+                        max="100"
+                        value="0"
+                        required
+                    >
 
-    <button type="submit">
-        Add IOC
-    </button>
+                    <span class="hint">
+                        Confidence score from 0 to 100 percent.
+                    </span>
+                </div>
 
-</form>
+                <div class="group full">
+                    <label for="source">Intelligence Source</label>
 
-<hr>
+                    <input
+                        id="source"
+                        type="text"
+                        name="source"
+                        maxlength="100"
+                        placeholder="e.g. VirusTotal, SOC Analyst, SIEM"
+                    >
+                </div>
 
-<a href="{{ url_for('iocs.index') }}">
-    ← Back to IOC Management
-</a>
+                <div class="group full">
+                    <label for="incident_id">Link to Incident</label>
+
+                    <select id="incident_id"
+                            name="incident_id">
+
+                        <option value="">
+                            No Incident
+                        </option>
+
+                        {% for incident in incidents %}
+
+                            <option value="{{ incident.id }}">
+                                Incident #{{ incident.id }} - {{ incident.title }}
+                            </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                    <span class="hint">
+                        Optionally associate this indicator with an active investigation.
+                    </span>
+                </div>
+
+            </div>
+
+            <div class="actions">
+
+                <button type="submit">
+                    Add IOC
+                </button>
+
+                <a href="{{ url_for('iocs.index') }}"
+                   class="cancel">
+                    Cancel
+                </a>
+
+            </div>
+
+        </form>
+
+    </section>
+
+</main>
+
+</div>
 
 </body>
 </html>
