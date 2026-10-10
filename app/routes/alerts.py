@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 
 from app import db
 from app.models import Alert, AuditLog
-
+from app.services.risk_scoring import get_risk_priority
 
 alerts = Blueprint("alerts", __name__, url_prefix="/alerts")
 
@@ -21,7 +21,7 @@ def alert_dashboard():
 
     high_alerts = sum(
         1 for alert in alerts_list
-        if alert.severity == "high"
+        if get_risk_priority(alert.risk_score or 0) == "high"
     )
 
     new_alerts = sum(
@@ -41,6 +41,7 @@ def alert_dashboard():
         high_alerts=high_alerts,
         new_alerts=new_alerts,
         investigating_alerts=investigating_alerts
+        get_risk_priority=get_risk_priority
     )
 
 
