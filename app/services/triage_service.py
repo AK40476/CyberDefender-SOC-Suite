@@ -1,4 +1,5 @@
 from app.services.alert_prioritization import get_prioritized_alerts
+from app.services.risk_scoring import get_risk_priority
 
 
 ACTIVE_STATUSES = {"new", "investigating"}
@@ -32,6 +33,7 @@ def get_triage_queue(alerts, limit=10):
 def get_triage_summary(alerts):
     """
     Return summary statistics for the active investigation queue.
+    Severity is derived from risk score, not stored alert severity.
     """
 
     active_alerts = get_active_alerts(alerts)
@@ -47,17 +49,10 @@ def get_triage_summary(alerts):
     }
 
     for alert in active_alerts:
-        if alert.status in summary:
+        if alert.status in {"new", "investigating"}:
             summary[alert.status] += 1
 
-        severity = (alert.severity or "medium").lower()
-
-        if severity in {
-            "critical",
-            "high",
-            "medium",
-            "low"
-        }:
-            summary[severity] += 1
+        severity = get_risk_priority(alert.risk_score or 0)
+        summary[severity] += 1
 
     return summary

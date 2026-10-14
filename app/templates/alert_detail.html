@@ -186,8 +186,10 @@
 
                 <div class="label">Severity</div>
 
-                <div class="value high">
-                    {{ alert.severity.upper() }}
+                {% set display_severity = get_risk_priority(alert.risk_score or 0) %}
+
+                <div class="value {{ display_severity }}">
+                    {{ display_severity|upper }}
                 </div>
 
             </div>
@@ -309,7 +311,7 @@
                             </div>
 
                             <div class="mini-value">
-                                {{ related_alert.severity.upper() }}
+                                {{ get_risk_priority(related_alert.risk_score or 0)|upper }}
                             </div>
                         </div>
 

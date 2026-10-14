@@ -502,23 +502,15 @@
 
                     <td>
 
-                        {% if incident.severity == "critical" %}
-
-                            <span class="critical">
-                                CRITICAL
-                            </span>
-
-                        {% elif incident.severity == "high" %}
-
-                            <span class="high">
-                                HIGH
-                            </span>
-
+                        {% if incident.alert %}
+                            {% set display_severity = get_risk_priority(incident.alert.risk_score or 0) %}
                         {% else %}
-
-                            {{ incident.severity.upper() }}
-
+                            {% set display_severity = incident.severity %}
                         {% endif %}
+
+                        <span class="{{ display_severity }}">
+                            {{ display_severity|upper }}
+                        </span>
 
                     </td>
 

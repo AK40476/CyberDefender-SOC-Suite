@@ -424,9 +424,16 @@
         <h1>Incident #{{ incident.id }}</h1>
         <p>{{ incident.title }}</p>
 
-        <span class="badge {{ incident.severity }}">
-            {{ incident.severity }}
+        {% if incident.alert %}
+            {% set display_severity = get_risk_priority(incident.alert.risk_score or 0) %}
+        {% else %}
+            {% set display_severity = incident.severity %}
+        {% endif %}
+
+        <span class="badge {{ display_severity }}">
+            {{ display_severity|upper }}
         </span>
+
 
         <span class="badge status">
             {{ incident.status.replace("_", " ").title() }}
@@ -444,7 +451,7 @@
 
     <div class="stat">
         <div class="stat-label">Severity</div>
-        <div class="stat-value">{{ incident.severity }}</div>
+        <div class="stat-value">{{ display_severity|upper }}</div>
     </div>
 
     <div class="stat">
@@ -557,7 +564,7 @@
 
                 <div class="alert-item">
                     <label>Severity</label>
-                    <span>{{ originating_alert.severity }}</span>
+                    <span>{{ get_risk_priority(originating_alert.risk_score or 0)|upper }}</span>
                 </div>
 
                 <div class="alert-item">

@@ -11,7 +11,7 @@ from app.services.triage_service import (
     get_triage_summary
 )
 from app.utils.decorators import role_required
-
+from app.services.risk_scoring import get_risk_priority
 
 dashboard = Blueprint("dashboard", __name__)
 
@@ -40,7 +40,7 @@ def index():
 
     high_alerts = sum(
         1 for alert in alerts
-        if alert.severity == "high"
+        if get_risk_priority(alert.risk_score or 0) == "high"
     )
 
     new_alerts = sum(
@@ -107,6 +107,8 @@ def index():
         correlated_attack_chains=correlated_attack_chains,
 
         prioritized_alerts=prioritized_alerts,
+
+        get_risk_priority=get_risk_priority,
 
         triage_queue=triage_queue,
         triage_summary=triage_summary

@@ -2,6 +2,8 @@ from collections import Counter
 
 from app import db
 from app.models import Alert
+from app.services.risk_scoring import get_risk_priority
+
 
 
 def get_soc_analytics():
@@ -14,20 +16,25 @@ def get_soc_analytics():
         .order_by(Alert.created_at.desc())
     ).all()
 
-    severity_counts = Counter(
-        alert.severity
-        for alert in alerts
-    )
-
     status_counts = Counter(
-        alert.status
-        for alert in alerts
+        alert.status for alert in alerts
     )
 
     rule_counts = Counter(
-        alert.detection_rule
-        for alert in alerts
+        alert.detection_rule for alert in alerts
     )
+
+    severity_counts = {
+        "critical": 0,
+        "high": 0,
+        "medium": 0,
+        "low": 0,
+    }
+
+    for alert in alerts:
+        severity = get_risk_priority(alert.risk_score or 0)
+        severity_counts[severity] += 1
+
 
     return {
         "total_alerts": len(alerts),

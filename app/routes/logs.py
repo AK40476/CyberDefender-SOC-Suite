@@ -2,6 +2,7 @@ from datetime import datetime
 
 from flask import Blueprint, jsonify, request
 from flask_login import login_required
+from app.services.risk_scoring import get_risk_priority
 
 from app import db
 from app.models import SecurityLog
@@ -71,7 +72,7 @@ def create_log():
         response["alert_created"] = True
         response["alert_id"] = alert.id
         response["alert_type"] = alert.alert_type
-        response["severity"] = alert.severity
+        response["severity"] = get_risk_priority(alert.risk_score or 0)
         response["risk_score"] = alert.risk_score
 
         correlation = correlate_alert(alert)

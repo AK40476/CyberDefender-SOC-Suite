@@ -1,10 +1,10 @@
+from app.services.risk_scoring import get_risk_priority
 from app.services.incident_workflow import is_valid_transition
 from app.services.incident_workflow import get_allowed_next_statuses
 from datetime import datetime
 
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
-
 from app import db
 from app.models import (
     Incident,
@@ -33,14 +33,70 @@ def index():
     status = request.args.get("status")
     assigned = request.args.get("assigned")
 
-    query = db.select(Incident).order_by(
-        Incident.created_at.desc()
+    query = (
+        db.select(Incident)
+        .outerjoin(Alert, Incident.alert_id == Alert.id)
+        .order_by(Incident.created_at.desc())
     )
 
     if severity:
-        query = query.where(
-            Incident.severity == severity
-        )
+        if severity == "critical":
+            query = query.where(
+                db.or_(
+                    db.and_(
+                        Incident.alert_id.isnot(None),
+                        Alert.risk_score >= 80
+                    ),
+                    db.and_(
+                        Incident.alert_id.is_(None),
+                        Incident.severity == "critical"
+                    )
+                )
+            )
+
+        elif severity == "high":
+            query = query.where(
+                db.or_(
+                    db.and_(
+                        Incident.alert_id.isnot(None),
+                        Alert.risk_score >= 60,
+                        Alert.risk_score < 80
+                    ),
+                    db.and_(
+                        Incident.alert_id.is_(None),
+                        Incident.severity == "high"
+                    )
+                )
+            )
+
+        elif severity == "medium":
+            query = query.where(
+                db.or_(
+                    db.and_(
+                        Incident.alert_id.isnot(None),
+                        Alert.risk_score >= 30,
+                        Alert.risk_score < 60
+                    ),
+                    db.and_(
+                        Incident.alert_id.is_(None),
+                        Incident.severity == "medium"
+                    )
+                )
+            )
+
+        elif severity == "low":
+            query = query.where(
+                db.or_(
+                    db.and_(
+                        Incident.alert_id.isnot(None),
+                        Alert.risk_score < 30
+                    ),
+                    db.and_(
+                        Incident.alert_id.is_(None),
+                        Incident.severity == "low"
+                    )
+                )
+            )
 
     if status:
         query = query.where(
@@ -88,7 +144,21 @@ def index():
     critical_incidents = sum(
         1
         for incident in all_incidents
-        if incident.severity == "critical"
+        if get_risk_priority(
+            incident.alert.risk_score
+            if incident.alert and incident.alert.risk_score is not None
+            else 0
+        ) == "critical"
+        and incident.status not in {
+            "resolved",
+            "false_positive"
+        }
+        if incident.alert
+    ) + sum(
+        1
+        for incident in all_incidents
+        if incident.alert is None
+        and incident.severity == "critical"
         and incident.status not in {
             "resolved",
             "false_positive"
@@ -98,7 +168,19 @@ def index():
     high_incidents = sum(
         1
         for incident in all_incidents
-        if incident.severity == "high"
+        if incident.alert
+        and get_risk_priority(
+            incident.alert.risk_score or 0
+        ) == "high"
+        and incident.status not in {
+            "resolved",
+            "false_positive"
+        }
+    ) + sum(
+        1
+        for incident in all_incidents
+        if incident.alert is None
+        and incident.severity == "high"
         and incident.status not in {
             "resolved",
             "false_positive"
@@ -115,7 +197,8 @@ def index():
         my_incidents=my_incidents,
         critical_incidents=critical_incidents,
         incident_users_map=incident_users_map,
-        high_incidents=high_incidents
+        high_incidents=high_incidents,
+        get_risk_priority=get_risk_priority
     )
 
 
@@ -228,8 +311,10 @@ def detail(incident_id):
         incident_users=users,
         timeline_entries=timeline_entries,
         incident_iocs=incident_iocs,
-        allowed_next_statuses=allowed_next_statuses
+        allowed_next_statuses=allowed_next_statuses,
+        get_risk_priority=get_risk_priority
     )
+
 
 @incidents.route("/<int:incident_id>/notes", methods=["POST"])
 @login_required
@@ -661,7 +746,7 @@ def create_from_alert(alert_id):
             f"Incident created from Alert #{alert.id}. "
             f"{alert.description}"
         ),
-        severity=alert.severity,
+        severity=get_risk_priority(alert.risk_score or 0),
         status="open",
         assigned_to=current_user.id
     )

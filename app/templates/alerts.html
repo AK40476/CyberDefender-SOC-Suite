@@ -74,9 +74,12 @@
         th {
             color: #94a3b8;
         }
-
-        .severity-high {
+        .severity-critical {
             color: #f87171;
+            font-weight: bold;
+        }
+        .severity-high {
+            color: #fb923c;
             font-weight: bold;
         }
 
@@ -186,8 +189,10 @@
 
                     <td>{{ alert.alert_type }}</td>
 
-                    <td class="severity-{{ alert.severity }}">
-                        {{ alert.severity.upper() }}
+                    {% set display_severity = get_risk_priority(alert.risk_score or 0) %}
+
+                    <td class="severity-{{ display_severity }}">
+                        {{ display_severity.upper() }}
                     </td>
 
                     <td>{{ alert.source_ip or "N/A" }}</td>

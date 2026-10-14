@@ -15,8 +15,10 @@ DETECTION_SCORES = {
 def calculate_risk_score(alert):
     score = 0
 
+    severity = (alert.severity or "medium").lower()
+
     score += SEVERITY_SCORES.get(
-        alert.severity.lower(),
+        severity,
         0
     )
 

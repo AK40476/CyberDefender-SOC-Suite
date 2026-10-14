@@ -10,6 +10,9 @@ login_manager = LoginManager()
 def create_app():
     app = Flask(__name__)
 
+    from app.services.risk_scoring import get_risk_priority
+    app.jinja_env.globals["get_risk_priority"] = get_risk_priority
+
     app.config["SECRET_KEY"] = "dev-secret-key-change-later"
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///cyberdefender.db"
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False

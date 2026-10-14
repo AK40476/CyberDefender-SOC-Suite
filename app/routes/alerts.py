@@ -1,9 +1,9 @@
 from flask import Blueprint, render_template, redirect, url_for, flash
 from flask_login import login_required, current_user
+from app.services.risk_scoring import get_risk_priority
 
 from app import db
 from app.models import Alert, AuditLog
-from app.services.risk_scoring import get_risk_priority
 
 alerts = Blueprint("alerts", __name__, url_prefix="/alerts")
 
@@ -40,7 +40,7 @@ def alert_dashboard():
         total_alerts=total_alerts,
         high_alerts=high_alerts,
         new_alerts=new_alerts,
-        investigating_alerts=investigating_alerts
+        investigating_alerts=investigating_alerts,
         get_risk_priority=get_risk_priority
     )
 
