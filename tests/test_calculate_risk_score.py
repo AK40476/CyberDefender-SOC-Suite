@@ -3,8 +3,11 @@ from types import SimpleNamespace
 
 import pytest
 
-from app.services.risk_scoring import calculate_risk_score
-
+from app.services.risk_scoring import (
+    DETECTION_SCORES,
+    SEVERITY_SCORES,
+    calculate_risk_score,
+)
 
 @pytest.mark.parametrize(
     ("severity", "rule", "status", "expected"),
@@ -35,3 +38,16 @@ def test_strongest_current_combination_scores_80():
     )
 
     assert calculate_risk_score(alert) == 80
+
+    
+def test_risk_score_is_capped_at_100(monkeypatch):
+    monkeypatch.setitem(SEVERITY_SCORES, "critical", 90)
+    monkeypatch.setitem(DETECTION_SCORES, "IOC_MATCH", 30)
+
+    alert = SimpleNamespace(
+        severity="critical",
+        detection_rule="IOC_MATCH",
+        status="new",
+    )
+
+    assert calculate_risk_score(alert) == 100
