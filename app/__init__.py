@@ -1,3 +1,6 @@
+import os
+import secrets
+
 from flask import Flask, render_template
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
@@ -13,7 +16,9 @@ def create_app():
     from app.services.risk_scoring import get_risk_priority
     app.jinja_env.globals["get_risk_priority"] = get_risk_priority
 
-    app.config["SECRET_KEY"] = "dev-secret-key-change-later"
+    app.config["SECRET_KEY"] = (
+        os.environ.get("SECRET_KEY") or secrets.token_hex(32)
+    )
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///cyberdefender.db"
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 

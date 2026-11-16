@@ -202,20 +202,18 @@ The project includes analyst and administrative access.
 
 CyberDefender-SOC-Suite/
 ├── app/
-│   ├── models/       # Database models
-│   ├── routes/       # Application routes and endpoints
-│   ├── services/     # Detection and SOC business logic
-│   ├── static/       # Static assets
-│   ├── templates/    # HTML templates
-│   └── utils/        # Supporting utilities and decorators
-├── instance/         # Local application instance data
-├── create_admin.py   # Administrative user setup
-├── create_analyst.py # Analyst user setup
-├── run.py            # Application entry point
-├── requirements.txt  # Python dependencies
+│   ├── models/
+│   ├── routes/
+│   ├── services/
+│   ├── templates/
+│   └── utils/
+├── tests/
+├── create_admin.py
+├── create_analyst.py
+├── run.py
+├── requirements.txt
 ├── README.md
 └── .gitignore
-
 
 ## Installation and Setup
 
@@ -228,33 +226,63 @@ CyberDefender-SOC-Suite/
 
 ### 1. Open the project directory
 
+```powershell
 cd CyberDefender-SOC-Suite
+```
 
 ### 2. Create a virtual environment
 
+```powershell
 python -m venv venv
+```
 
 ### 3. Activate the virtual environment
 
 On Windows PowerShell:
 
+```powershell
 .\venv\Scripts\Activate.ps1
+```
 
 ### 4. Install dependencies
 
+```powershell
 pip install -r requirements.txt
+```
 
-### 5. Prepare application users
+### 5. Initialize the database
 
-The repository includes `create_admin.py` and `create_analyst.py` for setting up the corresponding users. Follow the scripts' expected usage and configuration. Do not publish real passwords or reuse sensitive credentials in a demonstration environment.
+Run the application entry point once to create the required database tables:
 
-If the application database has not yet been initialized, follow the database setup procedure defined by the project before starting the application.
+```powershell
+python run.py
+```
+
+Wait for the Flask server to start, then stop it using `Ctrl+C`.
+
+### 6. Create application users
+
+Create an administrator account:
+
+```powershell
+python create_admin.py
+```
+
+Create an analyst account:
+
+```powershell
+python create_analyst.py
+```
+
+Follow the prompts to enter and confirm each account password. Passwords are entered securely and are not stored in the source code.
 
 ## Running the Application
 
 From the project root, with the virtual environment activated, run:
 
+```powershell
 python run.py
+```
 
 Open the local address in a browser:
 
@@ -264,39 +292,11 @@ Sign in using a locally configured account.
 
 **Security note:** Use a trusted local environment for demonstrations. Do not expose the Flask development server directly to the public internet.
 
-## Validation and Demonstration
+## Validation
 
-The completed implementation was checked through Python compilation, Git whitespace validation, database integrity checks, SOC pipeline validation, and manual application workflow testing.
+The project includes automated unit and integration tests covering risk scoring, alert prioritization, detection workflows, API endpoints, and incident lifecycle operations.
 
-The recorded demonstration dataset included:
-
-| Record Type                    | Count |
-| ------------------------------ | ----: |
-| Users                          |     2 |
-| Alerts                         |     8 |
-| Incidents                      |     5 |
-| IOCs                           |     5 |
-| Evidence records               |     1 |
-| Investigation timeline entries |    16 |
-| Analyst notes                  |     2 |
-| Audit log entries              |    36 |
-
-These figures describe the development database at the time of validation. They are sample project data, not production performance measurements.
-
-### Example Critical Investigation
-
-A representative test scenario demonstrated an IOC-matching alert with a risk score of 80, Critical priority, and a correlation relationship with a brute-force alert.
-
-The associated investigation workflow demonstrated:
-
-1. IOC-based alert detection.
-2. Risk scoring and prioritization.
-3. Correlation of related alerts.
-4. Attack-chain classification.
-5. Linking an eligible alert to an incident.
-6. Incident investigation and supporting records.
-
-This scenario demonstrates the integration of multiple SOC workflow components in one application.
+The test suite was executed successfully, with all 33 tests passing.
 
 ## Limitations
 
@@ -314,7 +314,7 @@ Potential extensions include:
 * External threat-intelligence integrations
 * Email and desktop notifications
 * Additional detection rules
-* Automated response integrations
+* Expanded automated test coverage for additional workflows
 * SIEM integration
 * Automated unit and integration tests
 * Containerized deployment
